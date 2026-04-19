@@ -5,7 +5,6 @@ body {
     font-family: Arial, sans-serif;
 }
 
-/* ===== ХЕДЕР (как на главной) ===== */
 .header {
     background-color: #0B1C2F;
     height: 90px;
@@ -19,10 +18,8 @@ body {
 }
 
 .header-left { display: flex; align-items: center; gap: 30px; }
-
 .logo-img { width: 70px; height: 70px; border-radius: 50%; overflow: hidden; }
 .logo-img img { width: 100%; height: 100%; }
-
 .brand { color: white; font-size: 40px; font-weight: bold; }
 
 .tab-switch {
@@ -44,7 +41,6 @@ body {
 }
 
 .tab-option:hover { background-color: #2a4055; }
-
 .nav-menu { display: flex; gap: 30px; align-items: center; }
 
 .profile-btn {
@@ -57,107 +53,74 @@ body {
     font-weight: 500;
 }
 
-.active-btn { outline: 3px solid white; }
+.profile-btn:hover { background-color: #b8c060; }
 
-/* ===== КОНТЕНТ ===== */
 .main {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 40px 50px;
+    padding: 40px 40px;
 }
 
 .page-title {
     font-size: 30px;
     font-weight: bold;
     color: #0B1C2F;
-    margin-bottom: 24px;
+    margin-bottom: 8px;
 }
 
-.msg {
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-size: 17px;
-    margin-bottom: 20px;
+.page-sub {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 32px;
 }
-.msg.success { background: #d4f4d4; color: #1a7a1a; }
-.msg.error   { background: #ffe0e0; color: #c00; }
 
-.profile-row {
+/* МАКЕТ */
+.map-layout {
     display: flex;
-    gap: 40px;
+    gap: 30px;
     align-items: flex-start;
 }
 
-.fields-col {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    flex: 1;
-}
-
-.field-box {
-    position: relative;
-    background: white;
-    border-radius: 14px;
-    height: 62px;
-    display: flex;
-    align-items: center;
-    padding: 0 48px 0 18px;
-}
-
-.field-box input {
-    flex: 1;
-    border: none;
-    background: transparent;
-    font-size: 20px;
-    color: #333;
-    outline: none;
-}
-
-.field-box input::placeholder { color: #888; }
-
-.star {
-    position: absolute;
-    right: 16px;
-    color: red;
-    font-size: 22px;
-}
-
-.right-col {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    flex: 1;
-}
-
-/* ФОТО */
-.photo-box {
-    background: white;
-    border-radius: 14px;
-    height: 320px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* КАРТА */
+.map-box {
+    flex: 2;
+    height: 550px;
+    border-radius: 16px;
     overflow: hidden;
-    cursor: pointer;
-    position: relative;
-    text-align: center;
+    background: #ddd;
 }
 
-.photo-box span {
+/* ПРАВАЯ ПАНЕЛЬ */
+.map-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.info-icon { font-size: 36px; }
+
+.info-card h2 {
     font-size: 20px;
-    color: #888;
-    pointer-events: none;
+    font-weight: bold;
+    color: #0B1C2F;
+}
+
+.info-card p {
+    font-size: 16px;
+    color: #444;
     line-height: 1.5;
 }
 
-.photo-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* КНОПКИ */
 .btn-row { display: flex; gap: 16px; }
 
 .btn {
@@ -174,22 +137,8 @@ body {
 
 .btn:hover { background: #ddd; }
 
-.btn-save {
-    background: #0B1C2F;
-    color: white;
-}
-
-.btn-save:hover { background: #1a2f45; }
-
-.logout-link {
-    text-align: center;
-    color: #555;
-    font-size: 16px;
-    text-decoration: underline;
-    cursor: pointer;
-}
-
 @media (max-width: 900px) {
-    .profile-row { flex-direction: column; }
+    .map-layout { flex-direction: column; }
+    .map-box { height: 350px; }
     .header { padding: 0 20px; }
 }

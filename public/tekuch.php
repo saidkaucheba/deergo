@@ -4,34 +4,23 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
+require_once 'db.php';
+$userId = $_SESSION['user_id'];
 
-$host = 'localhost'; $dbname = 'deergo'; $user = 'postgres'; $password = '';
-try {
-    $pdo = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die('Ошибка БД');
-}
-
-// Текущие доставки — статусы, не являющиеся "Доставлено"
-// Используем JOIN с адресами и статусами
 $stmt = $pdo->prepare("
-    SELECT 
-        o.id,
-        o.ordernumber,
-        o.weight,
-        o.price,
-        sa.street AS from_street, sa.house AS from_house,
-        da.street AS to_street, da.house AS to_house,
-        os.name AS status_name
-    FROM orders o
-    LEFT JOIN addresses sa ON o.shipmentaddressid = sa.id
-    LEFT JOIN addresses da ON o.deliveryaddressid = da.id
-    LEFT JOIN orderstatuses os ON o.statusid = os.id
-    WHERE o.userid = ? AND os.name != 'Доставлено'
-    ORDER BY o.id DESC
+    SELECT o.Id, o.OrderNumber,
+           sa.Street AS from_street, sa.House AS from_house,
+           da.Street AS to_street,   da.House AS to_house,
+           os.Name AS status_name
+    FROM Orders o
+    JOIN Addresses sa ON sa.Id = o.ShipmentAddressId
+    JOIN Addresses da ON da.Id = o.DeliveryAddressId
+    JOIN OrderStatuses os ON os.Id = o.StatusId
+    WHERE o.UserId = ?
+      AND os.Name NOT IN ('Доставлено', 'Отменено')
+    ORDER BY o.Id DESC
 ");
-$stmt->execute([$_SESSION['user_id']]);
+$stmt->execute([$userId]);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -39,93 +28,98 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Текущие доставки — DeerGo</title>
+    <title>DeerGo — Текущие доставки</title>
     <link rel="stylesheet" href="css/tekuch.css">
 </head>
 <body>
 
-    <header class="header">
-        <div class="header-left">
-            <div class="logo-img">
-                <img src="images/log.png" alt="логотип">
-            </div>
-            <span class="brand">DeerGo</span>
+<header class="header">
+    <div class="header-left">
+        <div class="logo-img">
+            <img src="images/log.png" alt="логотип">
         </div>
-        <nav class="nav-menu">
-            <div class="tab-switch">
-                <a href="index.php" class="tab-option">Главная</a>
-                <a href="cour.php" class="tab-option">Для курьеров</a>
-            </div>
-            <a href="profil.php" class="profile-btn">Профиль</a>
-        </nav>
-    </header>
+        <span class="brand">DeerGo</span>
+    </div>
+    <nav class="nav-menu">
+        <div class="tab-switch">
+            <a href="index.php" class="tab-option">Главная</a>
+            <a href="cour.php"  class="tab-option">Для курьеров</a>
+        </div>
+        <a href="profil.php" class="profile-btn">Профиль</a>
+    </nav>
+</header>
 
-    <main class="main">
-        <h1 class="page-title">Текущие доставки</h1>
-        <p class="page-subtitle">Здесь отображаются ваши активные заказы</p>
+<main class="main">
 
-        <div class="orders-layout">
+    <h1 class="page-title">Текущие доставки</h1>
+    <p class="page-sub">Здесь отображаются ваши заказы, которые сейчас в пути.</p>
 
-            <!-- СПИСОК ДОСТАВОК -->
-            <div class="orders-list">
-                <?php if (empty($orders)): ?>
-                    <div class="empty-msg">У вас пока нет активных доставок</div>
-                <?php else: ?>
-                    <?php foreach ($orders as $i => $o): ?>
-                    <div class="order-card <?= $i === 0 ? 'active' : '' ?>" onclick="selectOrder(<?= $i ?>)" data-index="<?= $i ?>">
-                        <div class="order-num">Доставка № <?= htmlspecialchars($o['ordernumber']) ?></div>
+    <div class="delivery-layout">
+
+        <div class="orders-list">
+            <?php if (empty($orders)): ?>
+                <div class="empty-msg">У вас нет активных доставок</div>
+            <?php else: ?>
+                <?php foreach ($orders as $i => $ord): ?>
+                    <div class="order-card <?= $i === 0 ? 'active' : '' ?>"
+                         onclick="selectOrder(this, <?= $ord['Id'] ?>)">
+                        <div class="order-num">Доставка №<?= htmlspecialchars($ord['ordernumber']) ?></div>
                         <div class="order-route">
-                            <span class="route-label">Откуда:</span> <?= htmlspecialchars($o['from_street'] . ', ' . $o['from_house']) ?>
+                            <span class="route-label">Откуда:</span>
+                            <?= htmlspecialchars($ord['from_street'] . ', ' . $ord['from_house']) ?>
                         </div>
                         <div class="order-route">
-                            <span class="route-label">Куда:</span> <?= htmlspecialchars($o['to_street'] . ', ' . $o['to_house']) ?>
+                            <span class="route-label">Куда:</span>
+                            <?= htmlspecialchars($ord['to_street'] . ', ' . $ord['to_house']) ?>
                         </div>
-                        <div class="order-status status-active"><?= htmlspecialchars($o['status_name']) ?></div>
-                        <a href="track.php?order=<?= $o['id'] ?>" class="btn-map">К карте</a>
+                        <div class="order-status">Статус: <strong><?= htmlspecialchars($ord['status_name']) ?></strong></div>
+                        <a href="karta.php?order=<?= $ord['Id'] ?>" class="btn-map">К карте</a>
                     </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
 
-                <div class="btn-row">
-                    <button class="btn" onclick="history.back()">Назад</button>
+        <div class="right-col">
+            <div class="detail-box">
+                <div class="detail-inner" id="detailBox">
+                    <?php if (!empty($orders)): $first = $orders[0]; ?>
+                        <h2 class="detail-title">Доставка №<?= htmlspecialchars($first['ordernumber']) ?></h2>
+                        <p><span class="route-label">Откуда:</span> <?= htmlspecialchars($first['from_street'] . ', ' . $first['from_house']) ?></p>
+                        <p><span class="route-label">Куда:</span> <?= htmlspecialchars($first['to_street'] . ', ' . $first['to_house']) ?></p>
+                        <p><span class="route-label">Статус:</span> <strong><?= htmlspecialchars($first['status_name']) ?></strong></p>
+                        <a href="karta.php?order=<?= $first['Id'] ?>" class="btn-map-big">Открыть карту</a>
+                    <?php else: ?>
+                        <p class="empty-msg">Нет активных доставок</p>
+                    <?php endif; ?>
                 </div>
             </div>
-
-            <!-- ДЕТАЛИ ВЫБРАННОГО ЗАКАЗА -->
-            <div class="order-detail" id="order-detail">
-                <?php if (!empty($orders)): ?>
-                    <?php foreach ($orders as $i => $o): ?>
-                    <div class="detail-block <?= $i === 0 ? '' : 'hidden' ?>" id="detail-<?= $i ?>">
-                        <div class="detail-title">Детали доставки</div>
-                        <div class="detail-row"><span>Номер:</span> <?= htmlspecialchars($o['ordernumber']) ?></div>
-                        <div class="detail-row"><span>Откуда:</span> <?= htmlspecialchars($o['from_street'] . ', ' . $o['from_house']) ?></div>
-                        <div class="detail-row"><span>Куда:</span> <?= htmlspecialchars($o['to_street'] . ', ' . $o['to_house']) ?></div>
-                        <div class="detail-row"><span>Вес:</span> <?= htmlspecialchars($o['weight']) ?> кг</div>
-                        <div class="detail-row"><span>Стоимость:</span> <?= htmlspecialchars($o['price']) ?> ₽</div>
-                        <div class="detail-row"><span>Статус:</span> <?= htmlspecialchars($o['status_name']) ?></div>
-                        <a href="track.php?order=<?= $o['id'] ?>" class="btn-map-big">Открыть карту</a>
-                    </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="detail-empty">Выберите доставку из списка</div>
-                <?php endif; ?>
+            <div class="btn-row">
+                <button class="btn" onclick="history.back()">Назад</button>
             </div>
-
         </div>
-    </main>
 
-    <script>
-    function selectOrder(index) {
-        // Убираем активный класс у всех карточек
-        document.querySelectorAll('.order-card').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.detail-block').forEach(d => d.classList.add('hidden'));
+    </div>
 
-        // Показываем нужную карточку и детали
-        document.querySelector('.order-card[data-index="' + index + '"]').classList.add('active');
-        const detail = document.getElementById('detail-' + index);
-        if (detail) detail.classList.remove('hidden');
-    }
-    </script>
+</main>
+
+<script>
+var ordersData = <?= json_encode($orders, JSON_UNESCAPED_UNICODE) ?>;
+
+function selectOrder(el, id) {
+    document.querySelectorAll('.order-card').forEach(function(c) { c.classList.remove('active'); });
+    el.classList.add('active');
+
+    var ord = ordersData.find(function(o) { return o.Id == id || o.id == id; });
+    if (!ord) return;
+
+    document.getElementById('detailBox').innerHTML =
+        '<h2 class="detail-title">Доставка №' + (ord.ordernumber || ord.OrderNumber) + '</h2>' +
+        '<p><span class="route-label">Откуда:</span> ' + (ord.from_street || '') + ', ' + (ord.from_house || '') + '</p>' +
+        '<p><span class="route-label">Куда:</span> '   + (ord.to_street   || '') + ', ' + (ord.to_house   || '') + '</p>' +
+        '<p><span class="route-label">Статус:</span> <strong>' + (ord.status_name || '') + '</strong></p>' +
+        '<a href="karta.php?order=' + id + '" class="btn-map-big">Открыть карту</a>';
+}
+</script>
 
 </body>
 </html>

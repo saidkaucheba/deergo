@@ -5,19 +5,23 @@ body {
     font-family: Arial, sans-serif;
 }
 
+/* ===== ХЕДЕР ===== */
 .header {
     background-color: #0B1C2F;
     height: 90px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 60px;
+    padding: 0 200px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .header-left {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 30px;
 }
 
 .logo-img {
@@ -27,10 +31,7 @@ body {
     overflow: hidden;
 }
 
-.logo-img img {
-    width: 100%;
-    height: 100%;
-}
+.logo-img img { width: 100%; height: 100%; }
 
 .brand {
     color: white;
@@ -61,9 +62,7 @@ body {
     color: black;
 }
 
-.tab-option:hover:not(.active) {
-    background-color: #2a4055;
-}
+.tab-option:hover:not(.active) { background-color: #2a4055; }
 
 .nav-menu {
     display: flex;
@@ -81,33 +80,44 @@ body {
     font-weight: 500;
 }
 
-.profile-btn:hover {
-    background-color: #b8c060;
-}
+.profile-btn:hover { background-color: #b8c060; }
 
+/* ===== ОСНОВНОЙ КОНТЕНТ ===== */
 .main {
     max-width: 1300px;
     margin: 0 auto;
     padding: 40px 40px;
 }
 
-/* ВВОДНЫЙ ТЕКСТ */
-.page-intro {
-    margin-bottom: 36px;
+.page-greeting {
+    font-size: 20px;
+    color: #0B1C2F;
+    margin-bottom: 8px;
 }
 
 .page-title {
     font-size: 34px;
     font-weight: bold;
     color: #0B1C2F;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
-.page-subtitle {
+.page-sub {
     font-size: 18px;
     color: #333;
+    margin-bottom: 36px;
 }
 
+.error-msg {
+    background: #ffe0e0;
+    color: #c00;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* ===== ВЕРХНИЙ РЯД ===== */
 .top-row {
     display: flex;
     justify-content: space-between;
@@ -168,7 +178,7 @@ body {
 
 .pin-btn {
     width: 60px;
-    height: 60px;
+    height: 50px;
     background: #0B1C2F;
     border: none;
     display: flex;
@@ -177,11 +187,9 @@ body {
     cursor: pointer;
 }
 
-.pin-btn img {
-    width: 50px;
-    height: 50px;
-}
+.pin-btn img { width: 30px; height: 30px; }
 
+/* ===== КАРТОЧКИ ВЫБОРА ===== */
 .cards-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -211,9 +219,7 @@ body {
     object-fit: contain;
 }
 
-.card:hover {
-    background: #e0e0e0;
-}
+.card:hover { background: #e0e0e0; }
 
 .card.active {
     background: #D4D885;
@@ -235,10 +241,9 @@ body {
     justify-content: center;
 }
 
-.card.active .check {
-    display: flex;
-}
+.card.active .check { display: flex; }
 
+/* ===== ПРАВАЯ ПАНЕЛЬ ===== */
 .right-panel {
     display: flex;
     flex-direction: column;
@@ -263,7 +268,7 @@ body {
 
 .buttons-group {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     flex-wrap: wrap;
     justify-content: flex-end;
 }
@@ -272,7 +277,7 @@ body {
     background: white;
     color: black;
     text-decoration: none;
-    padding: 14px 35px;
+    padding: 14px 30px;
     border-radius: 12px;
     font-size: 18px;
     font-weight: 500;
@@ -281,15 +286,13 @@ body {
     white-space: nowrap;
 }
 
-.btn-order:hover {
-    background: #e0e0e0;
-}
+.btn-order:hover { background: #e0e0e0; }
 
 .btn-track {
     background: #0B1C2F;
     color: white;
     text-decoration: none;
-    padding: 14px 35px;
+    padding: 14px 30px;
     border-radius: 12px;
     font-size: 18px;
     font-weight: 500;
@@ -298,22 +301,55 @@ body {
     white-space: nowrap;
 }
 
-.btn-track:hover {
-    background: #1a2f45;
+.btn-track:hover { background: #1a2f45; }
+
+/* ===== БЛОК «О КОМПАНИИ» ===== */
+.about-section {
+    margin-top: 60px;
 }
 
+.about-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #0B1C2F;
+    margin-bottom: 24px;
+}
+
+.about-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.about-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.about-icon { font-size: 36px; }
+
+.about-card h3 {
+    font-size: 20px;
+    color: #0B1C2F;
+}
+
+.about-card p {
+    font-size: 15px;
+    color: #444;
+    line-height: 1.4;
+}
+
+/* ===== АДАПТИВ ===== */
 @media (max-width: 900px) {
-    .top-row {
-        flex-direction: column;
-        align-items: center;
-    }
-    .left-panel {
-        max-width: 100%;
-    }
-    .right-panel {
-        align-items: center;
-    }
-    .delivery-photo {
-        width: 70vw;
-    }
+    .top-row { flex-direction: column; align-items: center; }
+    .left-panel { max-width: 100%; }
+    .right-panel { align-items: center; }
+    .delivery-photo { width: 70vw; }
+    .about-cards { grid-template-columns: 1fr; }
+    .header { padding: 0 20px; }
 }

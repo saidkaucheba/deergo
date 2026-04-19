@@ -1,75 +1,74 @@
 <?php
+// ===== ВСЯ ЛОГИКА ДО ВЫВОДА HTML =====
 session_start();
+require_once 'db.php';
 
-// Подключение к базе данных
-$host = 'localhost';
-$dbname = 'deergo';
-$user = 'postgres';
-$password = '';
-
-try {
-    $pdo = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    $error = 'Ошибка подключения к базе данных';
+if (isset($_SESSION['user_id'])) {
+    header('Location: index.php');
+    exit;
 }
 
-$page = isset($_GET['page']) ? $_GET['page'] : 'login';
 $error = '';
-$success = '';
+$mode  = (isset($_GET['mode']) && $_GET['mode'] === 'register') ? 'register' : 'login';
 
-// ВХОД
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'login') {
-    $email = trim($_POST['email']);
-    $password_input = trim($_POST['password']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
 
-    if ($email && $password_input) {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        $user_data = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($action === 'login') {
+        $email    = trim($_POST['email']    ?? '');
+        $password = $_POST['password'] ?? '';
 
-        if ($user_data && password_verify($password_input, $user_data['password'])) {
-            $_SESSION['user_id'] = $user_data['id'];
-            $_SESSION['user_firstname'] = $user_data['firstname'];
-            $_SESSION['user_lastname'] = $user_data['lastname'];
-            $_SESSION['user_email'] = $user_data['email'];
-            header('Location: index.php');
-            exit;
+        if (!$email || !$password) {
+            $error = 'Заполните все поля.';
         } else {
-            $error = 'Неверный email или пароль';
+            $stmt = $pdo->prepare("SELECT * FROM Users WHERE Email = ?");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($user && password_verify($password, $user['password'])) {
+                $_SESSION['user_id']    = $user['id'];
+                $_SESSION['user_name']  = $user['firstname'];
+                $_SESSION['user_last']  = $user['lastname'];
+                $_SESSION['user_email'] = $user['email'];
+                header('Location: index.php');
+                exit;
+            } else {
+                $error = 'Неверный email или пароль.';
+            }
         }
-    } else {
-        $error = 'Заполните все поля';
     }
-}
 
-// РЕГИСТРАЦИЯ
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'register') {
-    $firstname = trim($_POST['firstname']);
-    $lastname = trim($_POST['lastname']);
-    $email = trim($_POST['email']);
-    $password_input = trim($_POST['password']);
+    if ($action === 'register') {
+        $firstname = trim($_POST['firstname'] ?? '');
+        $lastname  = trim($_POST['lastname']  ?? '');
+        $email     = trim($_POST['email']     ?? '');
+        $password  = $_POST['password'] ?? '';
 
-    if ($firstname && $email && $password_input) {
-        // Проверяем, нет ли уже такого email
-        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        if ($stmt->fetch()) {
-            $error = 'Пользователь с таким email уже существует';
+        if (!$firstname || !$email || !$password) {
+            $error = 'Заполните обязательные поля (имя, email, пароль).';
+            $mode  = 'register';
         } else {
-            $hash = password_hash($password_input, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("INSERT INTO users (email, password, firstname, lastname) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$email, $hash, $firstname, $lastname]);
-            $new_id = $pdo->lastInsertId();
-            $_SESSION['user_id'] = $new_id;
-            $_SESSION['user_firstname'] = $firstname;
-            $_SESSION['user_lastname'] = $lastname;
-            $_SESSION['user_email'] = $email;
-            header('Location: index.php');
-            exit;
+            $stmt = $pdo->prepare("SELECT Id FROM Users WHERE Email = ?");
+            $stmt->execute([$email]);
+            if ($stmt->fetch()) {
+                $error = 'Этот email уже зарегистрирован.';
+                $mode  = 'register';
+            } else {
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $stmt = $pdo->prepare(
+                    "INSERT INTO Users (Email, Password, FirstName, LastName) VALUES (?, ?, ?, ?) RETURNING Id"
+                );
+                $stmt->execute([$email, $hash, $firstname, $lastname]);
+                $userId = $stmt->fetchColumn();
+
+                $_SESSION['user_id']    = $userId;
+                $_SESSION['user_name']  = $firstname;
+                $_SESSION['user_last']  = $lastname;
+                $_SESSION['user_email'] = $email;
+                header('Location: index.php');
+                exit;
+            }
         }
-    } else {
-        $error = 'Заполните обязательные поля';
     }
 }
 ?>
@@ -83,77 +82,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 </head>
 <body>
 
-<div class="page-wrap">
+<header class="header">
+    <div class="header-left">
+        <div class="logo-img">
+            <img src="images/log.png" alt="логотип">
+        </div>
+        <span class="brand">DeerGo</span>
+    </div>
+</header>
 
-    <!-- ШАПКА -->
-    <header class="header">
-        <div class="header-left">
-            <div class="logo-img">
-                <img src="images/log.png" alt="логотип">
+<main class="main">
+    <div class="auth-box">
+
+        <div class="tab-switch">
+            <a href="login.php?mode=login"    class="tab-option <?= $mode === 'login'    ? 'active' : '' ?>">Вход</a>
+            <a href="login.php?mode=register" class="tab-option <?= $mode === 'register' ? 'active' : '' ?>">Регистрация</a>
+        </div>
+
+        <?php if ($error): ?>
+            <p class="msg error"><?= htmlspecialchars($error) ?></p>
+        <?php endif; ?>
+
+        <?php if ($mode === 'login'): ?>
+        <form method="POST" class="auth-form">
+            <input type="hidden" name="action" value="login">
+            <div class="field-box">
+                <input type="email" name="email" placeholder="Электронная почта" required>
             </div>
-            <span class="brand">DeerGo</span>
-        </div>
-    </header>
-
-    <!-- КАРТОЧКА ВХОДА/РЕГИСТРАЦИИ -->
-    <main class="main">
-        <div class="card-box">
-
-            <!-- ПЕРЕКЛЮЧАТЕЛЬ -->
-            <div class="tab-switch">
-                <a href="login.php?page=login" class="tab-option <?= $page === 'login' ? 'active' : '' ?>">Вход</a>
-                <a href="login.php?page=register" class="tab-option <?= $page === 'register' ? 'active' : '' ?>">Регистрация</a>
+            <div class="field-box">
+                <input type="password" name="password" placeholder="Пароль" required>
             </div>
+            <button type="submit" class="btn-submit">Войти</button>
+        </form>
+        <p class="switch-link">Нет аккаунта? <a href="login.php?mode=register">Зарегистрироваться</a></p>
 
-            <?php if ($error): ?>
-                <div class="error-msg"><?= htmlspecialchars($error) ?></div>
-            <?php endif; ?>
+        <?php else: ?>
+        <form method="POST" class="auth-form">
+            <input type="hidden" name="action" value="register">
+            <div class="field-box">
+                <input type="text" name="firstname" placeholder="Имя *" required>
+            </div>
+            <div class="field-box">
+                <input type="text" name="lastname" placeholder="Фамилия">
+            </div>
+            <div class="field-box">
+                <input type="email" name="email" placeholder="Электронная почта *" required>
+            </div>
+            <div class="field-box">
+                <input type="password" name="password" placeholder="Пароль *" required>
+            </div>
+            <button type="submit" class="btn-submit">Зарегистрироваться</button>
+        </form>
+        <p class="switch-link">Уже есть аккаунт? <a href="login.php?mode=login">Войти</a></p>
+        <?php endif; ?>
 
-            <!-- ФОРМА ВХОДА -->
-            <?php if ($page === 'login'): ?>
-            <form method="POST" class="auth-form">
-                <input type="hidden" name="action" value="login">
-                <div class="field-box">
-                    <input type="email" name="email" placeholder="Электронная почта" required>
-                </div>
-                <div class="field-box">
-                    <input type="password" name="password" placeholder="Пароль" required>
-                </div>
-                <button type="submit" class="btn-submit">Войти</button>
-            </form>
-            <p class="switch-link">Нет аккаунта? <a href="login.php?page=register">Зарегистрироваться</a></p>
-
-            <!-- ФОРМА РЕГИСТРАЦИИ -->
-            <?php else: ?>
-            <form method="POST" class="auth-form">
-                <input type="hidden" name="action" value="register">
-                <div class="field-box">
-                    <input type="text" name="firstname" placeholder="Имя" required>
-                </div>
-                <div class="field-box">
-                    <input type="text" name="lastname" placeholder="Фамилия">
-                </div>
-                <div class="field-box">
-                    <input type="email" name="email" placeholder="Электронная почта" required>
-                </div>
-                <div class="field-box">
-                    <input type="password" name="password" placeholder="Пароль" required>
-                </div>
-                <button type="submit" class="btn-submit">Зарегистрироваться</button>
-            </form>
-            <p class="switch-link">Уже есть аккаунт? <a href="login.php?page=login">Войти</a></p>
-            <?php endif; ?>
-
-        </div>
-
-        <!-- ОПИСАНИЕ КОМПАНИИ -->
-        <div class="promo-block">
-            <h2>Быстрая и удобная доставка</h2>
-            <p>DeerGo — сервис курьерской доставки. Отправляйте посылки по городу быстро, удобно и по выгодной цене.</p>
-        </div>
-    </main>
-
-</div>
+    </div>
+</main>
 
 </body>
 </html>
