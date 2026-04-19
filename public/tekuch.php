@@ -5,23 +5,22 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 require_once 'db.php';
-$userId = $_SESSION['user_id'];
+$userId = (int)$_SESSION['user_id'];
 
-$stmt = $pdo->prepare("
+$result = mysqli_query($conn, "
     SELECT o.Id, o.OrderNumber,
            sa.Street AS from_street, sa.House AS from_house,
            da.Street AS to_street,   da.House AS to_house,
-           os.Name AS status_name
+           os.Name   AS status_name
     FROM Orders o
-    JOIN Addresses sa ON sa.Id = o.ShipmentAddressId
-    JOIN Addresses da ON da.Id = o.DeliveryAddressId
+    JOIN Addresses     sa ON sa.Id = o.ShipmentAddressId
+    JOIN Addresses     da ON da.Id = o.DeliveryAddressId
     JOIN OrderStatuses os ON os.Id = o.StatusId
-    WHERE o.UserId = ?
-      AND os.Name NOT IN ('Доставлено', 'Отменено')
+    WHERE o.UsersAndCouriersId = $userId
+      AND os.Name NOT IN ('Доставлен', 'Отменено')
     ORDER BY o.Id DESC
 ");
-$stmt->execute([$userId]);
-$orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$orders = mysqli_fetch_all($result, MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -62,8 +61,8 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php else: ?>
                 <?php foreach ($orders as $i => $ord): ?>
                     <div class="order-card <?= $i === 0 ? 'active' : '' ?>"
-                         onclick="selectOrder(this, <?= $ord['Id'] ?>)">
-                        <div class="order-num">Доставка №<?= htmlspecialchars($ord['ordernumber']) ?></div>
+                         onclick="selectOrder(this, <?= (int)$ord['Id'] ?>)">
+                        <div class="order-num">Доставка №<?= htmlspecialchars($ord['OrderNumber']) ?></div>
                         <div class="order-route">
                             <span class="route-label">Откуда:</span>
                             <?= htmlspecialchars($ord['from_street'] . ', ' . $ord['from_house']) ?>
@@ -72,8 +71,10 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <span class="route-label">Куда:</span>
                             <?= htmlspecialchars($ord['to_street'] . ', ' . $ord['to_house']) ?>
                         </div>
-                        <div class="order-status">Статус: <strong><?= htmlspecialchars($ord['status_name']) ?></strong></div>
-                        <a href="karta.php?order=<?= $ord['Id'] ?>" class="btn-map">К карте</a>
+                        <div class="order-status">
+                            Статус: <strong><?= htmlspecialchars($ord['status_name']) ?></strong>
+                        </div>
+                        <a href="karta.php?order=<?= (int)$ord['Id'] ?>" class="btn-map">К карте</a>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -83,11 +84,14 @@ $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="detail-box">
                 <div class="detail-inner" id="detailBox">
                     <?php if (!empty($orders)): $first = $orders[0]; ?>
-                        <h2 class="detail-title">Доставка №<?= htmlspecialchars($first['ordernumber']) ?></h2>
-                        <p><span class="route-label">Откуда:</span> <?= htmlspecialchars($first['from_street'] . ', ' . $first['from_house']) ?></p>
-                        <p><span class="route-label">Куда:</span> <?= htmlspecialchars($first['to_street'] . ', ' . $first['to_house']) ?></p>
-                        <p><span class="route-label">Статус:</span> <strong><?= htmlspecialchars($first['status_name']) ?></strong></p>
-                        <a href="karta.php?order=<?= $first['Id'] ?>" class="btn-map-big">Открыть карту</a>
+                        <h2 class="detail-title">Доставка №<?= htmlspecialchars($first['OrderNumber']) ?></h2>
+                        <p><span class="route-label">Откуда:</span>
+                            <?= htmlspecialchars($first['from_street'] . ', ' . $first['from_house']) ?></p>
+                        <p><span class="route-label">Куда:</span>
+                            <?= htmlspecialchars($first['to_street']   . ', ' . $first['to_house']) ?></p>
+                        <p><span class="route-label">Статус:</span>
+                            <strong><?= htmlspecialchars($first['status_name']) ?></strong></p>
+                        <a href="karta.php?order=<?= (int)$first['Id'] ?>" class="btn-map-big">Открыть карту</a>
                     <?php else: ?>
                         <p class="empty-msg">Нет активных доставок</p>
                     <?php endif; ?>
@@ -109,11 +113,11 @@ function selectOrder(el, id) {
     document.querySelectorAll('.order-card').forEach(function(c) { c.classList.remove('active'); });
     el.classList.add('active');
 
-    var ord = ordersData.find(function(o) { return o.Id == id || o.id == id; });
+    var ord = ordersData.find(function(o) { return o.Id == id; });
     if (!ord) return;
 
     document.getElementById('detailBox').innerHTML =
-        '<h2 class="detail-title">Доставка №' + (ord.ordernumber || ord.OrderNumber) + '</h2>' +
+        '<h2 class="detail-title">Доставка №' + (ord.OrderNumber || '') + '</h2>' +
         '<p><span class="route-label">Откуда:</span> ' + (ord.from_street || '') + ', ' + (ord.from_house || '') + '</p>' +
         '<p><span class="route-label">Куда:</span> '   + (ord.to_street   || '') + ', ' + (ord.to_house   || '') + '</p>' +
         '<p><span class="route-label">Статус:</span> <strong>' + (ord.status_name || '') + '</strong></p>' +

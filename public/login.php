@@ -1,5 +1,4 @@
 <?php
-// ===== ВСЯ ЛОГИКА ДО ВЫВОДА HTML =====
 session_start();
 require_once 'db.php';
 
@@ -21,15 +20,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$email || !$password) {
             $error = 'Заполните все поля.';
         } else {
-            $stmt = $pdo->prepare("SELECT * FROM Users WHERE Email = ?");
-            $stmt->execute([$email]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            $email_safe = mysqli_real_escape_string($conn, $email);
+            $result = mysqli_query($conn, "SELECT * FROM UsersAndCouriers WHERE Email = '$email_safe'");
+            $user   = mysqli_fetch_assoc($result);
 
-            if ($user && password_verify($password, $user['password'])) {
-                $_SESSION['user_id']    = $user['id'];
-                $_SESSION['user_name']  = $user['firstname'];
-                $_SESSION['user_last']  = $user['lastname'];
-                $_SESSION['user_email'] = $user['email'];
+            if ($user && password_verify($password, $user['Password'])) {
+                $_SESSION['user_id']    = $user['Id'];
+                $_SESSION['user_name']  = $user['FirstName'];
+                $_SESSION['user_last']  = $user['LastName'];
+                $_SESSION['user_email'] = $user['Email'];
+                $_SESSION['user_role']  = $user['Role'];
                 header('Location: index.php');
                 exit;
             } else {
@@ -43,28 +43,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $lastname  = trim($_POST['lastname']  ?? '');
         $email     = trim($_POST['email']     ?? '');
         $password  = $_POST['password'] ?? '';
+        $phone     = trim($_POST['phone'] ?? '');
 
         if (!$firstname || !$email || !$password) {
             $error = 'Заполните обязательные поля (имя, email, пароль).';
             $mode  = 'register';
         } else {
-            $stmt = $pdo->prepare("SELECT Id FROM Users WHERE Email = ?");
-            $stmt->execute([$email]);
-            if ($stmt->fetch()) {
+            $email_safe = mysqli_real_escape_string($conn, $email);
+            $check = mysqli_query($conn, "SELECT Id FROM UsersAndCouriers WHERE Email = '$email_safe'");
+
+            if (mysqli_fetch_assoc($check)) {
                 $error = 'Этот email уже зарегистрирован.';
                 $mode  = 'register';
             } else {
-                $hash = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $pdo->prepare(
-                    "INSERT INTO Users (Email, Password, FirstName, LastName) VALUES (?, ?, ?, ?) RETURNING Id"
-                );
-                $stmt->execute([$email, $hash, $firstname, $lastname]);
-                $userId = $stmt->fetchColumn();
+                $hash      = password_hash($password, PASSWORD_DEFAULT);
+                $fn_safe   = mysqli_real_escape_string($conn, $firstname);
+                $ln_safe   = mysqli_real_escape_string($conn, $lastname);
+                $ph_safe   = mysqli_real_escape_string($conn, $phone);
+                $hash_safe = mysqli_real_escape_string($conn, $hash);
+
+                mysqli_query($conn, "
+                    INSERT INTO UsersAndCouriers (Email, Password, FirstName, LastName, Phone)
+                    VALUES ('$email_safe', '$hash_safe', '$fn_safe', '$ln_safe', '$ph_safe')
+                ");
+                $userId = mysqli_insert_id($conn);
 
                 $_SESSION['user_id']    = $userId;
                 $_SESSION['user_name']  = $firstname;
                 $_SESSION['user_last']  = $lastname;
                 $_SESSION['user_email'] = $email;
+                $_SESSION['user_role']  = null;
                 header('Location: index.php');
                 exit;
             }
@@ -127,6 +135,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="field-box">
                 <input type="email" name="email" placeholder="Электронная почта *" required>
+            </div>
+            <div class="field-box">
+                <input type="tel" name="phone" placeholder="Номер телефона">
             </div>
             <div class="field-box">
                 <input type="password" name="password" placeholder="Пароль *" required>

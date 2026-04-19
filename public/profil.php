@@ -4,50 +4,52 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
-
 require_once 'db.php';
-$userId = $_SESSION['user_id'];
+$userId = (int)$_SESSION['user_id'];
 $saved  = false;
 $error  = '';
 
 // Загружаем данные из БД
-$stmt = $pdo->prepare("SELECT * FROM Users WHERE Id = ?");
-$stmt->execute([$userId]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
+$result = mysqli_query($conn, "SELECT * FROM UsersAndCouriers WHERE Id = $userId");
+$user   = mysqli_fetch_assoc($result);
 
 // Сохранение
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $firstname = trim($_POST['firstname'] ?? '');
-    $lastname  = trim($_POST['lastname']  ?? '');
-    $email     = trim($_POST['email']     ?? '');
-    $phone     = trim($_POST['phone']     ?? '');
+    $firstname = mysqli_real_escape_string($conn, trim($_POST['firstname'] ?? ''));
+    $lastname  = mysqli_real_escape_string($conn, trim($_POST['lastname']  ?? ''));
+    $email     = mysqli_real_escape_string($conn, trim($_POST['email']     ?? ''));
+    $phone     = mysqli_real_escape_string($conn, trim($_POST['phone']     ?? ''));
 
     if (!$firstname || !$email) {
         $error = 'Имя и email обязательны.';
     } else {
-        $stmt = $pdo->prepare("UPDATE Users SET FirstName=?, LastName=?, Email=? WHERE Id=?");
-        $stmt->execute([$firstname, $lastname, $email, $userId]);
+        mysqli_query($conn, "
+            UPDATE UsersAndCouriers
+            SET FirstName='$firstname', LastName='$lastname', Email='$email', Phone='$phone'
+            WHERE Id=$userId
+        ");
 
+        // Сохранение фото
         if (!empty($_FILES['photo']['tmp_name'])) {
             $photoData = file_get_contents($_FILES['photo']['tmp_name']);
-            $stmt = $pdo->prepare("UPDATE Users SET Image=? WHERE Id=?");
-            $stmt->execute([$photoData, $userId]);
+            $photoData = mysqli_real_escape_string($conn, $photoData);
+            mysqli_query($conn, "UPDATE UsersAndCouriers SET Image='$photoData' WHERE Id=$userId");
         }
 
-        $_SESSION['user_name']  = $firstname;
-        $_SESSION['user_last']  = $lastname;
-        $_SESSION['user_email'] = $email;
+        $_SESSION['user_name']  = trim($_POST['firstname']);
+        $_SESSION['user_last']  = trim($_POST['lastname']);
+        $_SESSION['user_email'] = trim($_POST['email']);
 
-        $stmt = $pdo->prepare("SELECT * FROM Users WHERE Id = ?");
-        $stmt->execute([$userId]);
-        $user  = $stmt->fetch(PDO::FETCH_ASSOC);
-        $saved = true;
+        // Перечитываем из БД
+        $result = mysqli_query($conn, "SELECT * FROM UsersAndCouriers WHERE Id = $userId");
+        $user   = mysqli_fetch_assoc($result);
+        $saved  = true;
     }
 }
 
 $photoSrc = '';
-if (!empty($user['image'])) {
-    $photoSrc = 'data:image/jpeg;base64,' . base64_encode($user['image']);
+if (!empty($user['Image'])) {
+    $photoSrc = 'data:image/jpeg;base64,' . base64_encode($user['Image']);
 }
 ?>
 <!DOCTYPE html>
@@ -94,24 +96,37 @@ if (!empty($user['image'])) {
                 <div class="field-box">
                     <input type="text" name="firstname"
                            placeholder="Имя *"
-                           value="<?= htmlspecialchars($user['firstname'] ?? '') ?>">
+                           value="<?= htmlspecialchars($user['FirstName'] ?? '') ?>">
                     <span class="star">*</span>
                 </div>
                 <div class="field-box">
                     <input type="text" name="lastname"
                            placeholder="Фамилия"
-                           value="<?= htmlspecialchars($user['lastname'] ?? '') ?>">
+                           value="<?= htmlspecialchars($user['LastName'] ?? '') ?>">
                 </div>
                 <div class="field-box">
                     <input type="email" name="email"
                            placeholder="Электронная почта *"
-                           value="<?= htmlspecialchars($user['email'] ?? '') ?>">
+                           value="<?= htmlspecialchars($user['Email'] ?? '') ?>">
                     <span class="star">*</span>
                 </div>
                 <div class="field-box">
                     <input type="tel" name="phone"
                            placeholder="Номер телефона"
-                           value="<?= htmlspecialchars($user['phone'] ?? '') ?>">
+                           value="<?= htmlspecialchars($user['Phone'] ?? '') ?>">
+                </div>
+
+                <!-- Показываем роль -->
+                <div class="field-box" style="background:#f0f0f0; padding: 0 18px;">
+                    <span style="font-size:17px; color:#555;">
+                        Роль: <strong>
+                        <?php
+                        if ($user['Role'] == 1) echo 'Курьер';
+                        elseif ($user['Role'] == 0) echo 'Пользователь';
+                        else echo 'Пользователь';
+                        ?>
+                        </strong>
+                    </span>
                 </div>
 
                 <div class="btn-row">
@@ -126,7 +141,9 @@ if (!empty($user['image'])) {
                 <div class="photo-box" onclick="document.getElementById('photoInput').click()">
                     <img src="<?= $photoSrc ?>" alt="" id="photoPreview"
                          style="<?= $photoSrc ? 'display:block' : 'display:none' ?>">
-                    <span id="photoLabel" style="<?= $photoSrc ? 'display:none' : '' ?>">Нажмите, чтобы<br>добавить фото</span>
+                    <span id="photoLabel" style="<?= $photoSrc ? 'display:none' : '' ?>">
+                        Нажмите, чтобы<br>добавить фото
+                    </span>
                     <input type="file" name="photo" accept="image/*" id="photoInput"
                            style="display:none" onchange="previewPhoto(this)">
                 </div>

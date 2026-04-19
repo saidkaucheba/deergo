@@ -4,6 +4,9 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
+require_once 'db.php';
+
+// Сохраняем данные заказа в сессию и редиректим на оформление
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['delivery_from']   = $_POST['from']    ?? '';
     $_SESSION['delivery_to']     = $_POST['to']      ?? '';
@@ -12,6 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Location: oform.php');
     exit;
 }
+
+// Получаем виды доставки из БД
+$result        = mysqli_query($conn, "SELECT * FROM DeliveryTypes ORDER BY Id");
+$deliveryTypes = mysqli_fetch_all($result, MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -52,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="top-row">
         <div class="left-panel">
             <form method="POST" id="orderForm">
+
                 <div class="inputs-row">
                     <div class="input-box">
                         <input type="text" name="from" id="fromInput" placeholder="Откуда" required>
@@ -68,55 +76,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <input type="hidden" name="weight"  id="weightVal" value="10">
-                <input type="hidden" name="type_id" id="typeIdVal" value="1">
+                <input type="hidden" name="type_id" id="typeIdVal" value="<?= $deliveryTypes[0]['Id'] ?? 1 ?>">
 
+                <!-- Размер доставки (веса) -->
                 <div class="section">
                     <div class="section-title">Размер доставки</div>
                     <div class="cards-row" id="size-group">
-                        <div class="card active" data-weight="10">
-                            <span>до 10 кг</span>
+                        <?php
+                        $weights = [10, 20, 50, 100];
+                        foreach ($weights as $i => $w):
+                        ?>
+                        <div class="card <?= $i === 0 ? 'active' : '' ?>" data-weight="<?= $w ?>">
+                            <span>до <?= $w ?> кг</span>
                             <div class="check">✔</div>
                         </div>
-                        <div class="card" data-weight="20">
-                            <span>до 20 кг</span>
-                            <div class="check">✔</div>
-                        </div>
-                        <div class="card" data-weight="50">
-                            <span>до 50 кг</span>
-                            <div class="check">✔</div>
-                        </div>
-                        <div class="card" data-weight="100">
-                            <span>до 100 кг</span>
-                            <div class="check">✔</div>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
 
+                <!-- Вид доставки из БД -->
                 <div class="section">
                     <div class="section-title">Вид доставки</div>
                     <div class="cards-row" id="type-group">
-                        <div class="card" data-type="1">
-                            <span>Курьер</span>
-                            <img src="images/courier.png" alt="Курьер">
+                        <?php
+                        $typeImages = [
+                            'Курьер'          => 'courier.png',
+                            'Легковая машина' => 'car.png',
+                            'Фургон'          => 'gruzov.png',
+                            'Грузовая'        => 'bolsh.png',
+                        ];
+                        foreach ($deliveryTypes as $i => $dt):
+                            $img = $typeImages[$dt['Name']] ?? 'courier.png';
+                        ?>
+                        <div class="card <?= $i === 0 ? 'active' : '' ?>" data-type="<?= $dt['Id'] ?>">
+                            <span><?= htmlspecialchars($dt['Name']) ?></span>
+                            <img src="images/<?= $img ?>" alt="<?= htmlspecialchars($dt['Name']) ?>">
                             <div class="check">✔</div>
                         </div>
-                        <div class="card active" data-type="2">
-                            <span>Легковая</span>
-                            <img src="images/car.png" alt="Легковая">
-                            <div class="check">✔</div>
-                        </div>
-                        <div class="card" data-type="3">
-                            <span>Фургон</span>
-                            <img src="images/gruzov.png" alt="Грузовая">
-                            <div class="check">✔</div>
-                        </div>
-                        <div class="card" data-type="4">
-                            <span>Грузовая</span>
-                            <img src="images/bolsh.png" alt="Большая">
-                            <div class="check">✔</div>
-                        </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
+
             </form>
         </div>
 
@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <img src="images/dostav.jpg" alt="Доставка">
             </div>
             <div class="buttons-group">
-                <a href="karta.php"      class="btn-track">Отследить заказ</a>
+                <a href="karta.php"  class="btn-track">Отследить заказ</a>
                 <button class="btn-order" onclick="submitOrder()">Заказать доставку</button>
             </div>
             <div class="buttons-group">

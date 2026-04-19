@@ -17,55 +17,55 @@ if (!$from || !$to) {
     exit;
 }
 
-// Данные о типе доставки
-$stmt = $pdo->prepare("SELECT * FROM DeliveryTypes WHERE Id = ?");
-$stmt->execute([$typeId]);
-$deliveryType = $stmt->fetch(PDO::FETCH_ASSOC);
-$typeName  = $deliveryType['name']  ?? 'Курьер';
-$basePrice = (int)($deliveryType['price'] ?? 300);
+// Данные о типе доставки из БД
+$typeId_safe  = (int)$typeId;
+$res          = mysqli_query($conn, "SELECT * FROM DeliveryTypes WHERE Id = $typeId_safe");
+$deliveryType = mysqli_fetch_assoc($res);
+$typeName     = $deliveryType['Name']  ?? 'Курьер';
+$basePrice    = (int)($deliveryType['Price'] ?? 300);
 
-// Расчёт стоимости: базовая + вес*5 + расстояние*10 (расстояние — заглушка 5 км)
+// Расчёт стоимости
 $distanceKm = 5;
 $price = $basePrice + ($weight * 5) + ($distanceKm * 10);
 
 $orderPlaced = false;
 $orderNum    = '';
 
-// Оплата
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay'])) {
-    $comment = trim($_POST['comment'] ?? '');
+    $comment = mysqli_real_escape_string($conn, trim($_POST['comment'] ?? ''));
 
     // Адрес «Откуда»
     $fromParts  = explode(',', $from);
-    $fromStreet = trim($fromParts[0] ?? $from);
-    $fromHouse  = trim($fromParts[1] ?? '1');
-    $stmt = $pdo->prepare("INSERT INTO Addresses (UserId, Street, House) VALUES (?, ?, ?) RETURNING Id");
-    $stmt->execute([$userId, $fromStreet, $fromHouse]);
-    $fromAddrId = $stmt->fetchColumn();
+    $fromStreet = mysqli_real_escape_string($conn, trim($fromParts[0] ?? $from));
+    $fromHouse  = mysqli_real_escape_string($conn, trim($fromParts[1] ?? '1'));
+    mysqli_query($conn, "INSERT INTO Addresses (UsersAndCouriersId, Street, House) VALUES ($userId, '$fromStreet', '$fromHouse')");
+    $fromAddrId = mysqli_insert_id($conn);
 
     // Адрес «Куда»
     $toParts  = explode(',', $to);
-    $toStreet = trim($toParts[0] ?? $to);
-    $toHouse  = trim($toParts[1] ?? '1');
-    $stmt = $pdo->prepare("INSERT INTO Addresses (UserId, Street, House) VALUES (?, ?, ?) RETURNING Id");
-    $stmt->execute([$userId, $toStreet, $toHouse]);
-    $toAddrId = $stmt->fetchColumn();
+    $toStreet = mysqli_real_escape_string($conn, trim($toParts[0] ?? $to));
+    $toHouse  = mysqli_real_escape_string($conn, trim($toParts[1] ?? '1'));
+    mysqli_query($conn, "INSERT INTO Addresses (UsersAndCouriersId, Street, House) VALUES ($userId, '$toStreet', '$toHouse')");
+    $toAddrId = mysqli_insert_id($conn);
 
-    // Статус «Новый» — первый по Id
-    $stmtS    = $pdo->query("SELECT Id FROM OrderStatuses ORDER BY Id LIMIT 1");
-    $statusId = $stmtS->fetchColumn() ?: 1;
+    // Первый статус из БД
+    $stRes    = mysqli_query($conn, "SELECT Id FROM OrderStatuses ORDER BY Id LIMIT 1");
+    $stRow    = mysqli_fetch_assoc($stRes);
+    $statusId = $stRow['Id'] ?? 1;
 
     // Номер заказа
     $orderNum = 'DG-' . date('Ymd') . '-' . rand(1000, 9999);
+    $orderNum_safe = mysqli_real_escape_string($conn, $orderNum);
 
     // Запись заказа
-    $stmt = $pdo->prepare("
+    mysqli_query($conn, "
         INSERT INTO Orders
-            (OrderNumber, UserId, ShipmentAddressId, DeliveryAddressId,
-             DeliveryTypeId, StatusId, Weight, Price, Comment)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (OrderNumber, UsersAndCouriersId, ShipmentAddressId, DeliveryAddressId,
+             DeliveryTypeId, StatusId, Weight, Price, Comment, ReceiptTime)
+        VALUES
+            ('$orderNum_safe', $userId, $fromAddrId, $toAddrId,
+             $typeId_safe, $statusId, $weight, $price, '$comment', NOW())
     ");
-    $stmt->execute([$orderNum, $userId, $fromAddrId, $toAddrId, $typeId, $statusId, $weight, $price, $comment]);
 
     // Очищаем сессию
     unset($_SESSION['delivery_from'], $_SESSION['delivery_to'],
@@ -164,7 +164,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay'])) {
                     <span>Итого:</span>
                     <strong><?= $price ?> ₽</strong>
                 </div>
-                <p class="price-note">Базовая цена <?= $basePrice ?> ₽ + вес (<?= $weight * 5 ?> ₽) + доставка (<?= $distanceKm * 10 ?> ₽)</p>
+                <p class="price-note">
+                    Базовая цена <?= $basePrice ?> ₽ + вес (<?= $weight * 5 ?> ₽) + доставка (<?= $distanceKm * 10 ?> ₽)
+                </p>
             </div>
         </div>
 

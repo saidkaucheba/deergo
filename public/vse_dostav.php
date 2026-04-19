@@ -5,26 +5,25 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 require_once 'db.php';
-$userId = $_SESSION['user_id'];
+$userId = (int)$_SESSION['user_id'];
 
-$stmt = $pdo->prepare("
+$result = mysqli_query($conn, "
     SELECT o.Id, o.OrderNumber, o.Price,
            sa.Street AS from_street, sa.House AS from_house,
            da.Street AS to_street,   da.House AS to_house,
-           os.Name AS status_name
+           os.Name   AS status_name
     FROM Orders o
-    JOIN Addresses sa ON sa.Id = o.ShipmentAddressId
-    JOIN Addresses da ON da.Id = o.DeliveryAddressId
+    JOIN Addresses     sa ON sa.Id = o.ShipmentAddressId
+    JOIN Addresses     da ON da.Id = o.DeliveryAddressId
     JOIN OrderStatuses os ON os.Id = o.StatusId
-    WHERE o.UserId = ?
+    WHERE o.UsersAndCouriersId = $userId
     ORDER BY o.Id DESC
 ");
-$stmt->execute([$userId]);
-$orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$orders = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
 function statusColor($name) {
-    if ($name === 'Доставлено') return '#4CAF50';
-    if ($name === 'Отменено')   return '#f44336';
+    if ($name === 'Доставлен') return '#4CAF50';
+    if ($name === 'Отменено')  return '#f44336';
     return '#F5A623';
 }
 ?>
@@ -67,8 +66,8 @@ function statusColor($name) {
             <?php else: ?>
                 <?php foreach ($orders as $i => $ord): ?>
                     <div class="order-card <?= $i === 0 ? 'active' : '' ?>"
-                         onclick="selectOrder(this, <?= $ord['Id'] ?>)">
-                        <div class="order-num">Доставка №<?= htmlspecialchars($ord['ordernumber']) ?></div>
+                         onclick="selectOrder(this, <?= (int)$ord['Id'] ?>)">
+                        <div class="order-num">Доставка №<?= htmlspecialchars($ord['OrderNumber']) ?></div>
                         <div class="order-route">
                             <span class="route-label">Откуда:</span>
                             <?= htmlspecialchars($ord['from_street'] . ', ' . $ord['from_house']) ?>
@@ -89,10 +88,13 @@ function statusColor($name) {
             <div class="detail-box">
                 <div class="detail-inner" id="detailBox">
                     <?php if (!empty($orders)): $first = $orders[0]; ?>
-                        <h2 class="detail-title">Доставка №<?= htmlspecialchars($first['ordernumber']) ?></h2>
-                        <p><span class="route-label">Откуда:</span> <?= htmlspecialchars($first['from_street'] . ', ' . $first['from_house']) ?></p>
-                        <p><span class="route-label">Куда:</span>   <?= htmlspecialchars($first['to_street']   . ', ' . $first['to_house'])   ?></p>
-                        <p><span class="route-label">Стоимость:</span> <strong><?= htmlspecialchars($first['price']) ?> ₽</strong></p>
+                        <h2 class="detail-title">Доставка №<?= htmlspecialchars($first['OrderNumber']) ?></h2>
+                        <p><span class="route-label">Откуда:</span>
+                            <?= htmlspecialchars($first['from_street'] . ', ' . $first['from_house']) ?></p>
+                        <p><span class="route-label">Куда:</span>
+                            <?= htmlspecialchars($first['to_street']   . ', ' . $first['to_house']) ?></p>
+                        <p><span class="route-label">Стоимость:</span>
+                            <strong><?= htmlspecialchars($first['Price']) ?> ₽</strong></p>
                         <p><span class="route-label">Статус:</span>
                             <strong style="color: <?= statusColor($first['status_name']) ?>">
                                 <?= htmlspecialchars($first['status_name']) ?>
@@ -116,25 +118,26 @@ function statusColor($name) {
 <script>
 var ordersData = <?= json_encode($orders, JSON_UNESCAPED_UNICODE) ?>;
 
-var statusColors = { 'Доставлено': '#4CAF50', 'Отменено': '#f44336' };
-
 function getColor(name) {
-    return statusColors[name] || '#F5A623';
+    if (name === 'Доставлен') return '#4CAF50';
+    if (name === 'Отменено')  return '#f44336';
+    return '#F5A623';
 }
 
 function selectOrder(el, id) {
     document.querySelectorAll('.order-card').forEach(function(c) { c.classList.remove('active'); });
     el.classList.add('active');
 
-    var ord = ordersData.find(function(o) { return o.Id == id || o.id == id; });
+    var ord = ordersData.find(function(o) { return o.Id == id; });
     if (!ord) return;
 
     document.getElementById('detailBox').innerHTML =
-        '<h2 class="detail-title">Доставка №' + (ord.ordernumber || '') + '</h2>' +
+        '<h2 class="detail-title">Доставка №' + (ord.OrderNumber || '') + '</h2>' +
         '<p><span class="route-label">Откуда:</span> ' + (ord.from_street || '') + ', ' + (ord.from_house || '') + '</p>' +
         '<p><span class="route-label">Куда:</span> '   + (ord.to_street   || '') + ', ' + (ord.to_house   || '') + '</p>' +
-        '<p><span class="route-label">Стоимость:</span> <strong>' + (ord.price || 0) + ' ₽</strong></p>' +
-        '<p><span class="route-label">Статус:</span> <strong style="color:' + getColor(ord.status_name) + '">' + (ord.status_name || '') + '</strong></p>';
+        '<p><span class="route-label">Стоимость:</span> <strong>' + (ord.Price || 0) + ' ₽</strong></p>' +
+        '<p><span class="route-label">Статус:</span> <strong style="color:' + getColor(ord.status_name) + '">' +
+        (ord.status_name || '') + '</strong></p>';
 }
 </script>
 

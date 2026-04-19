@@ -4,6 +4,26 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
+require_once 'db.php';
+$userId  = (int)$_SESSION['user_id'];
+$orderId = (int)($_GET['order'] ?? 0);
+
+$orderInfo = null;
+if ($orderId > 0) {
+    $result = mysqli_query($conn, "
+        SELECT o.OrderNumber,
+               sa.Street AS from_street, sa.House AS from_house,
+               da.Street AS to_street,   da.House AS to_house,
+               os.Name   AS status_name
+        FROM Orders o
+        JOIN Addresses     sa ON sa.Id = o.ShipmentAddressId
+        JOIN Addresses     da ON da.Id = o.DeliveryAddressId
+        JOIN OrderStatuses os ON os.Id = o.StatusId
+        WHERE o.Id = $orderId AND o.UsersAndCouriersId = $userId
+        LIMIT 1
+    ");
+    $orderInfo = mysqli_fetch_assoc($result);
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -34,7 +54,16 @@ if (!isset($_SESSION['user_id'])) {
 <main class="main">
 
     <h1 class="page-title">Карта доставки</h1>
-    <p class="page-sub">Здесь будет отображаться текущее местоположение вашей доставки.</p>
+
+    <?php if ($orderInfo): ?>
+        <p class="page-sub">
+            Заказ №<?= htmlspecialchars($orderInfo['OrderNumber']) ?> —
+            <?= htmlspecialchars($orderInfo['from_street'] . ', ' . $orderInfo['from_house']) ?>
+            → <?= htmlspecialchars($orderInfo['to_street'] . ', ' . $orderInfo['to_house']) ?>
+        </p>
+    <?php else: ?>
+        <p class="page-sub">Здесь будет отображаться текущее местоположение вашей доставки.</p>
+    <?php endif; ?>
 
     <div class="map-layout">
         <div class="map-box" id="map"></div>
@@ -43,7 +72,13 @@ if (!isset($_SESSION['user_id'])) {
             <div class="info-card">
                 <div class="info-icon">📦</div>
                 <h2>Отслеживание</h2>
-                <p>Функция отслеживания в реальном времени будет доступна после назначения курьера.</p>
+                <?php if ($orderInfo): ?>
+                    <p><strong>Статус:</strong> <?= htmlspecialchars($orderInfo['status_name']) ?></p>
+                    <p><strong>Откуда:</strong> <?= htmlspecialchars($orderInfo['from_street'] . ', ' . $orderInfo['from_house']) ?></p>
+                    <p><strong>Куда:</strong> <?= htmlspecialchars($orderInfo['to_street'] . ', ' . $orderInfo['to_house']) ?></p>
+                <?php else: ?>
+                    <p>Функция отслеживания в реальном времени будет доступна после назначения курьера.</p>
+                <?php endif; ?>
             </div>
             <div class="info-card">
                 <div class="info-icon">📍</div>
@@ -58,16 +93,11 @@ if (!isset($_SESSION['user_id'])) {
 
 </main>
 
-<!--
-    Для работы карты получите бесплатный ключ на:
-    https://developer.tech.yandex.ru/
-    и замените ВАШ_КЛЮЧ_ЯНДЕКС ниже.
--->
 <script src="https://api-maps.yandex.ru/2.1/?apikey=b9162b22-8464-4258-90f7-1dbb2bcb3717&lang=ru_RU" type="text/javascript"></script>
 <script>
 ymaps.ready(function () {
     var map = new ymaps.Map('map', {
-        center: [62.0355, 129.6755], // Якутск
+        center: [62.0355, 129.6755],
         zoom: 12,
         controls: ['zoomControl', 'fullscreenControl']
     });

@@ -1,14 +1,14 @@
 <?php
-// Подключение к базе данных PostgreSQL
 $host = 'localhost';
-$dbname = 'deergo';
-$user = 'postgres';
-$password = '';
+$user = 'root';
+$pass = '';
+$base = 'deergo';
 
-try {
-    $pdo = new PDO("pgsql:host=$host;dbname=$dbname", $user, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die('Ошибка подключения к БД: ' . $e->getMessage());
+$conn = mysqli_connect($host, $user, $pass, $base);
+
+if (!$conn) {
+    die('Ошибка подключения к БД: ' . mysqli_connect_error());
 }
+
+mysqli_set_charset($conn, 'utf8mb4');
 ?>
