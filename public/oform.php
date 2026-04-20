@@ -5,6 +5,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 require_once 'db.php';
+require_once 'csrf.php';
 $userId = $_SESSION['user_id'];
 
 $from   = $_SESSION['delivery_from']   ?? '';
@@ -32,6 +33,7 @@ $orderPlaced = false;
 $orderNum    = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay'])) {
+    csrf_verify();
     $comment = mysqli_real_escape_string($conn, trim($_POST['comment'] ?? ''));
 
     // Адрес «Откуда»
@@ -137,6 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay'])) {
                     <button type="button" class="btn" onclick="history.back()">Назад</button>
                     <button type="submit" name="pay" class="btn btn-pay">Оплатить</button>
                 </div>
+                <?= csrf_field() ?>
             </form>
         </div>
 

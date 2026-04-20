@@ -177,13 +177,17 @@ document.querySelectorAll('#type-group .card').forEach(card => {
 });
 
 function submitOrder() {
-    if (!fromInput.value.trim() || !toInput.value.trim()) {
+    var from = sanitize(document.getElementById('fromInput').value.trim());
+    var to   = sanitize(document.getElementById('toInput').value.trim());
+    if (!from || !to) {
         alert('Введите адреса');
         return;
     }
-    orderForm.submit();
+    document.getElementById('fromInput').value = from;
+    document.getElementById('toInput').value   = to;
+    document.getElementById('orderForm').submit();
 }
 </script>
-
+<script src="scripts/sanitize.js"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'csrf.php';
 require_once 'db.php';
 
 if (isset($_SESSION['user_id'])) {
@@ -11,6 +12,7 @@ $error = '';
 $mode  = (isset($_GET['mode']) && $_GET['mode'] === 'register') ? 'register' : 'login';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     $action = $_POST['action'] ?? '';
 
     if ($action === 'login') {
@@ -126,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <button type="submit" class="btn-submit">Войти</button>
+                <?= csrf_field() ?>
             </form>
 
             <p class="switch-link">
@@ -157,6 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <button type="submit" class="btn-submit">Зарегистрироваться</button>
+                <?= csrf_field() ?>
             </form>
 
             <p class="switch-link">

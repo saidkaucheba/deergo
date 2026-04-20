@@ -160,9 +160,9 @@ document.querySelectorAll('#schedule-group .schedule-card').forEach(function(car
 
 // ===== ОТПРАВКА ЗАЯВКИ =====
 function submitApplication() {
-    var firstname = document.getElementById('firstname').value.trim();
-    var lastname  = document.getElementById('lastname').value.trim();
-    var phone     = document.getElementById('phone').value.trim();
+    var firstname = sanitize(document.getElementById('firstname').value.trim());
+    var lastname  = sanitize(document.getElementById('lastname').value.trim());
+    var phone     = sanitize(document.getElementById('phone').value.trim());
     var transport = document.querySelector('#transport-group .transport-card.active span').textContent;
     var schedule  = document.querySelector('#schedule-group .schedule-card.active').textContent;
 
@@ -175,6 +175,6 @@ function submitApplication() {
           '\nТелефон: ' + phone + '\nТранспорт: ' + transport + '\nРасписание: ' + schedule);
 }
 </script>
-
+<script src="scripts/sanitize.js"></script>
 </body>
 </html>
