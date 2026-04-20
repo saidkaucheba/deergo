@@ -1,10 +1,10 @@
 <?php
-$host = 'localhost';
+$host = '127.0.1.31';
 $user = 'root';
 $pass = '';
 $base = 'deergo';
 
-$conn = mysqli_connect($host, $user, $pass, $base);
+$conn = mysqli_connect($host, $user, $pass, $base, 3306);
 
 if (!$conn) {
     die('Ошибка подключения к БД: ' . mysqli_connect_error());

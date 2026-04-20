@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'login') {
-        $email    = trim($_POST['email']    ?? '');
+        $email    = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
         if (!$email || !$password) {
@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user_last']  = $user['LastName'];
                 $_SESSION['user_email'] = $user['Email'];
                 $_SESSION['user_role']  = $user['Role'];
+
                 header('Location: index.php');
                 exit;
             } else {
@@ -40,8 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'register') {
         $firstname = trim($_POST['firstname'] ?? '');
-        $lastname  = trim($_POST['lastname']  ?? '');
-        $email     = trim($_POST['email']     ?? '');
+        $lastname  = trim($_POST['lastname'] ?? '');
+        $email     = trim($_POST['email'] ?? '');
         $password  = $_POST['password'] ?? '';
         $phone     = trim($_POST['phone'] ?? '');
 
@@ -66,13 +67,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     INSERT INTO UsersAndCouriers (Email, Password, FirstName, LastName, Phone)
                     VALUES ('$email_safe', '$hash_safe', '$fn_safe', '$ln_safe', '$ph_safe')
                 ");
-                $userId = mysqli_insert_id($conn);
 
-                $_SESSION['user_id']    = $userId;
+                $_SESSION['user_id']    = mysqli_insert_id($conn);
                 $_SESSION['user_name']  = $firstname;
                 $_SESSION['user_last']  = $lastname;
                 $_SESSION['user_email'] = $email;
                 $_SESSION['user_role']  = null;
+
                 header('Location: index.php');
                 exit;
             }
@@ -80,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -103,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="auth-box">
 
         <div class="tab-switch">
-            <a href="login.php?mode=login"    class="tab-option <?= $mode === 'login'    ? 'active' : '' ?>">Вход</a>
+            <a href="login.php?mode=login" class="tab-option <?= $mode === 'login' ? 'active' : '' ?>">Вход</a>
             <a href="login.php?mode=register" class="tab-option <?= $mode === 'register' ? 'active' : '' ?>">Регистрация</a>
         </div>
 
@@ -112,39 +114,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <?php if ($mode === 'login'): ?>
-        <form method="POST" class="auth-form">
-            <input type="hidden" name="action" value="login">
-            <div class="field-box">
-                <input type="email" name="email" placeholder="Электронная почта" required>
-            </div>
-            <div class="field-box">
-                <input type="password" name="password" placeholder="Пароль" required>
-            </div>
-            <button type="submit" class="btn-submit">Войти</button>
-        </form>
-        <p class="switch-link">Нет аккаунта? <a href="login.php?mode=register">Зарегистрироваться</a></p>
+            <form method="POST" class="auth-form">
+                <input type="hidden" name="action" value="login">
+
+                <div class="field-box">
+                    <input type="email" name="email" placeholder="Электронная почта" required>
+                </div>
+
+                <div class="field-box">
+                    <input type="password" name="password" placeholder="Пароль" required>
+                </div>
+
+                <button type="submit" class="btn-submit">Войти</button>
+            </form>
+
+            <p class="switch-link">
+                Нет аккаунта? <a href="login.php?mode=register">Зарегистрироваться</a>
+            </p>
 
         <?php else: ?>
-        <form method="POST" class="auth-form">
-            <input type="hidden" name="action" value="register">
-            <div class="field-box">
-                <input type="text" name="firstname" placeholder="Имя *" required>
-            </div>
-            <div class="field-box">
-                <input type="text" name="lastname" placeholder="Фамилия">
-            </div>
-            <div class="field-box">
-                <input type="email" name="email" placeholder="Электронная почта *" required>
-            </div>
-            <div class="field-box">
-                <input type="tel" name="phone" placeholder="Номер телефона">
-            </div>
-            <div class="field-box">
-                <input type="password" name="password" placeholder="Пароль *" required>
-            </div>
-            <button type="submit" class="btn-submit">Зарегистрироваться</button>
-        </form>
-        <p class="switch-link">Уже есть аккаунт? <a href="login.php?mode=login">Войти</a></p>
+            <form method="POST" class="auth-form">
+                <input type="hidden" name="action" value="register">
+
+                <div class="field-box">
+                    <input type="text" name="firstname" placeholder="Имя *" required>
+                </div>
+
+                <div class="field-box">
+                    <input type="text" name="lastname" placeholder="Фамилия">
+                </div>
+
+                <div class="field-box">
+                    <input type="email" name="email" placeholder="Электронная почта *" required>
+                </div>
+
+                <div class="field-box">
+                    <input type="tel" name="phone" placeholder="Номер телефона">
+                </div>
+
+                <div class="field-box">
+                    <input type="password" name="password" placeholder="Пароль *" required>
+                </div>
+
+                <button type="submit" class="btn-submit">Зарегистрироваться</button>
+            </form>
+
+            <p class="switch-link">
+                Уже есть аккаунт? <a href="login.php?mode=login">Войти</a>
+            </p>
         <?php endif; ?>
 
     </div>

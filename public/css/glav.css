@@ -5,7 +5,6 @@ body {
     font-family: Arial, sans-serif;
 }
 
-/* ===== ХЕДЕР ===== */
 .header {
     background-color: #0B1C2F;
     height: 90px;
@@ -18,26 +17,10 @@ body {
     z-index: 100;
 }
 
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 30px;
-}
-
-.logo-img {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    overflow: hidden;
-}
-
+.header-left { display: flex; align-items: center; gap: 30px; }
+.logo-img { width: 70px; height: 70px; border-radius: 50%; overflow: hidden; }
 .logo-img img { width: 100%; height: 100%; }
-
-.brand {
-    color: white;
-    font-size: 40px;
-    font-weight: bold;
-}
+.brand { color: white; font-size: 40px; font-weight: bold; }
 
 .tab-switch {
     display: flex;
@@ -63,12 +46,7 @@ body {
 }
 
 .tab-option:hover:not(.active) { background-color: #2a4055; }
-
-.nav-menu {
-    display: flex;
-    gap: 30px;
-    align-items: center;
-}
+.nav-menu { display: flex; gap: 30px; align-items: center; }
 
 .profile-btn {
     background-color: #D4D885;
@@ -82,49 +60,33 @@ body {
 
 .profile-btn:hover { background-color: #b8c060; }
 
-/* ===== ОСНОВНОЙ КОНТЕНТ ===== */
+/* MAIN */
 .main {
-    max-width: 1300px;
-    margin: 0 auto;
-    padding: 40px 40px;
-}
-
-.page-greeting {
-    font-size: 20px;
-    color: #0B1C2F;
-    margin-bottom: 8px;
+    max-width: 1200px;
+    margin: auto;
+    padding: 40px 20px;
 }
 
 .page-title {
-    font-size: 34px;
+    font-size: 25px;
     font-weight: bold;
     color: #0B1C2F;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
+    text-align: center;
 }
 
 .page-sub {
     font-size: 18px;
     color: #333;
     margin-bottom: 36px;
+    text-align: center;
 }
 
-.error-msg {
-    background: #ffe0e0;
-    color: #c00;
-    border-radius: 10px;
-    padding: 12px 18px;
-    font-size: 16px;
-    margin-bottom: 20px;
-}
-
-/* ===== ВЕРХНИЙ РЯД ===== */
 .top-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: 40px;
+    align-items: flex-start; gap: 40px;
 }
-
 .left-panel {
     display: flex;
     flex-direction: column;
@@ -132,21 +94,18 @@ body {
     flex: 1;
     max-width: 520px;
 }
-
 .inputs-row {
     display: flex;
     flex-direction: column;
     gap: 16px;
     width: 100%;
 }
-
 .section {
     display: flex;
     flex-direction: column;
     gap: 16px;
     width: 100%;
 }
-
 .section-title {
     background: white;
     border-radius: 12px;
@@ -156,54 +115,51 @@ body {
     font-weight: 500;
     width: 100%;
 }
-
 .input-box {
-    display: flex;
-    align-items: center;
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
+    display: flex; 
+    align-items: center; 
+    background: white; 
+    border-radius: 12px; 
+    overflow: hidden; 
     height: 50px;
     width: 100%;
-}
-
-.input-box input {
-    border: none;
+} 
+.input-box input { 
+    border: none; 
     font-size: 18px;
     padding: 0 15px;
     outline: none;
-    color: black;
+    color: black; 
     width: 100%;
-}
-
-.pin-btn {
+} 
+.pin-btn { 
     width: 60px;
     height: 50px;
     background: #0B1C2F;
     border: none;
-    display: flex;
+    display: flex; 
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+    cursor: pointer; 
 }
-
-.pin-btn img { width: 30px; height: 30px; }
-
-/* ===== КАРТОЧКИ ВЫБОРА ===== */
+.pin-btn img {
+    width: 30px;
+    height: 30px;
+} 
+/* ===== КАРТОЧКИ ВЫБОРА ===== */ 
 .cards-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 15px;
     width: 100%;
-}
-
+} 
 .card {
     position: relative;
     background: white;
     border-radius: 12px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: center; 
     cursor: pointer;
     flex-direction: column;
     gap: 6px;
@@ -211,21 +167,19 @@ body {
     font-size: 17px;
     padding: 8px 4px;
     text-align: center;
-}
-
+} 
 .card img {
     width: 40px;
     height: 40px;
     object-fit: contain;
 }
-
-.card:hover { background: #e0e0e0; }
-
+.card:hover {
+    background: #e0e0e0;
+}
 .card.active {
     background: #D4D885;
     border: 2px solid #0B1C2F;
 }
-
 .check {
     position: absolute;
     top: 5px;
@@ -235,84 +189,62 @@ body {
     font-size: 11px;
     width: 20px;
     height: 20px;
-    border-radius: 50%;
+    border-radius: 50%; 
     display: none;
     align-items: center;
     justify-content: center;
 }
+.card.active .check {
+    display: flex;
+}
 
-.card.active .check { display: flex; }
-
-/* ===== ПРАВАЯ ПАНЕЛЬ ===== */
 .right-panel {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
     gap: 20px;
-}
-
-.delivery-photo {
-    border-radius: 20px;
-    overflow: hidden;
-    width: 45vw;
-    max-width: 550px;
-    min-width: 350px;
-    aspect-ratio: 1 / 1;
 }
 
 .delivery-photo img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    border-radius: 15px;
 }
 
 .buttons-group {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-.btn-order {
-    background: white;
-    color: black;
-    text-decoration: none;
-    padding: 14px 30px;
-    border-radius: 12px;
-    font-size: 18px;
-    font-weight: 500;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    color: white;
+    padding: 18px 60px;
+    border-radius: 14px;
+    font-size: 22px;
+    font-weight: bold;
     border: none;
     cursor: pointer;
-    white-space: nowrap;
 }
 
-.btn-order:hover { background: #e0e0e0; }
+.btn {
+    text-align: center;
+    padding: 14px;
+    border-radius: 10px;
+    background: white;
+    text-decoration: none;
+    color: black;
+}
 
-.btn-track {
+.btn.primary {
     background: #0B1C2F;
     color: white;
-    text-decoration: none;
-    padding: 14px 30px;
-    border-radius: 12px;
-    font-size: 18px;
-    font-weight: 500;
-    border: none;
-    cursor: pointer;
-    white-space: nowrap;
+    
 }
 
-.btn-track:hover { background: #1a2f45; }
-
-/* ===== БЛОК «О КОМПАНИИ» ===== */
+/* ABOUT */
 .about-section {
     margin-top: 60px;
 }
 
 .about-title {
-    font-size: 28px;
-    font-weight: bold;
-    color: #0B1C2F;
-    margin-bottom: 24px;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 .about-cards {
@@ -323,33 +255,15 @@ body {
 
 .about-card {
     background: white;
-    border-radius: 16px;
-    padding: 28px 20px;
+    border-radius: 15px;
+    padding: 20px;
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
 }
 
-.about-icon { font-size: 36px; }
-
-.about-card h3 {
-    font-size: 20px;
-    color: #0B1C2F;
-}
-
-.about-card p {
-    font-size: 15px;
-    color: #444;
-    line-height: 1.4;
-}
-
-/* ===== АДАПТИВ ===== */
-@media (max-width: 900px) {
-    .top-row { flex-direction: column; align-items: center; }
-    .left-panel { max-width: 100%; }
-    .right-panel { align-items: center; }
-    .delivery-photo { width: 70vw; }
-    .about-cards { grid-template-columns: 1fr; }
-    .header { padding: 0 20px; }
+.about-card img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 10px;
 }
