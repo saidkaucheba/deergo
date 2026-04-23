@@ -24,6 +24,7 @@ $deliveryTypes = mysqli_fetch_all($result, MYSQLI_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeerGo — Главная</title>
+    <link rel="stylesheet" href="css/fonts.css"> 
     <link rel="stylesheet" href="css/glav.css">
 </head>
 <body>

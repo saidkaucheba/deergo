@@ -4,49 +4,74 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
-require_once 'db.php';
-$userId = (int)$_SESSION['user_id'];
+
+require_once 'db.php';   // убедись, что db.php подключает MySQL
+$userId = $_SESSION['user_id'];
 $saved  = false;
 $error  = '';
 
 // Загружаем данные из БД
-$result = mysqli_query($conn, "SELECT * FROM UsersAndCouriers WHERE Id = $userId");
-$user   = mysqli_fetch_assoc($result);
+$stmt = mysqli_prepare($conn, "SELECT * FROM UsersAndCouriers WHERE Id = ?");
+mysqli_stmt_bind_param($stmt, "i", $userId);
+mysqli_stmt_execute($stmt);
+
+$result = mysqli_stmt_get_result($stmt);
+$user = mysqli_fetch_assoc($result);
 
 // Сохранение
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $firstname = mysqli_real_escape_string($conn, trim($_POST['firstname'] ?? ''));
-    $lastname  = mysqli_real_escape_string($conn, trim($_POST['lastname']  ?? ''));
-    $email     = mysqli_real_escape_string($conn, trim($_POST['email']     ?? ''));
-    $phone     = mysqli_real_escape_string($conn, trim($_POST['phone']     ?? ''));
+    $firstname = trim($_POST['firstname'] ?? '');
+    $lastname  = trim($_POST['lastname']  ?? '');
+    $email     = trim($_POST['email']     ?? '');
 
     if (!$firstname || !$email) {
         $error = 'Имя и email обязательны.';
     } else {
-        mysqli_query($conn, "
-            UPDATE UsersAndCouriers
-            SET FirstName='$firstname', LastName='$lastname', Email='$email', Phone='$phone'
-            WHERE Id=$userId
-        ");
-
-        // Сохранение фото
-        if (!empty($_FILES['photo']['tmp_name'])) {
+        // Если загружено фото — сохраняем вместе с остальными данными
+        if (!empty($_FILES['photo']['tmp_name']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
             $photoData = file_get_contents($_FILES['photo']['tmp_name']);
-            $photoData = mysqli_real_escape_string($conn, $photoData);
-            mysqli_query($conn, "UPDATE UsersAndCouriers SET Image='$photoData' WHERE Id=$userId");
+            $stmt = mysqli_prepare($conn, 
+                "UPDATE UsersAndCouriers SET FirstName=?, LastName=?, Email=?, Image=? WHERE Id=?");
+            mysqli_stmt_bind_param($stmt, "ssssi",
+                $firstname,
+                $lastname,
+                $email,
+                $photoData,
+                $userId
+            );
+
+            mysqli_stmt_execute($stmt);
+        } else {
+            $stmt = mysqli_prepare($conn,
+                "UPDATE UsersAndCouriers SET FirstName=?, LastName=?, Email=? WHERE Id=?"
+            );
+
+            mysqli_stmt_bind_param($stmt, "sssi",
+                $firstname,
+                $lastname,
+                $email,
+                $userId
+            );
+
+            mysqli_stmt_execute($stmt);
         }
 
-        $_SESSION['user_name']  = trim($_POST['firstname']);
-        $_SESSION['user_last']  = trim($_POST['lastname']);
-        $_SESSION['user_email'] = trim($_POST['email']);
+        $_SESSION['user_name']  = $firstname;
+        $_SESSION['user_last']  = $lastname;
+        $_SESSION['user_email'] = $email;
 
-        // Перечитываем из БД
-        $result = mysqli_query($conn, "SELECT * FROM UsersAndCouriers WHERE Id = $userId");
-        $user   = mysqli_fetch_assoc($result);
-        $saved  = true;
+        // Перечитываем пользователя из БД
+        $stmt = mysqli_prepare($conn, "SELECT * FROM UsersAndCouriers WHERE Id = ?");
+        mysqli_stmt_bind_param($stmt, "i", $userId);
+        mysqli_stmt_execute($stmt);
+
+        $result = mysqli_stmt_get_result($stmt);
+        $user = mysqli_fetch_assoc($result);
+        $saved = true;
     }
 }
 
+// Формируем src для фото из BLOB
 $photoSrc = '';
 if (!empty($user['Image'])) {
     $photoSrc = 'data:image/jpeg;base64,' . base64_encode($user['Image']);
@@ -58,6 +83,7 @@ if (!empty($user['Image'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeerGo — Профиль</title>
+    <link rel="stylesheet" href="css/fonts.css"> 
     <link rel="stylesheet" href="css/profil.css">
 </head>
 <body>
