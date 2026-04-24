@@ -56,7 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay'])) {
     $statusId = $stRow['Id'] ?? 1;
 
     // Номер заказа
-    $orderNum = 'DG-' . date('Ymd') . '-' . rand(1000, 9999);
+    $maxRes = mysqli_query($conn, "SELECT MAX(Id) + 1 AS next_num FROM Orders");
+    $maxRow = mysqli_fetch_assoc($maxRes);
+    $orderNum = (string)($maxRow['next_num'] ?? 1);
     $orderNum_safe = mysqli_real_escape_string($conn, $orderNum);
 
     // Запись заказа
