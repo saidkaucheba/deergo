@@ -135,6 +135,7 @@ body {
 .btn-row { display: flex; gap: 16px; }
 
 .btn {
+    font-family: 'Schiffbauer', Arial, sans-serif;
     flex: 1;
     height: 56px;
     border-radius: 14px;

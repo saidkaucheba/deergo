@@ -81,11 +81,6 @@ if ($orderId > 0) {
                     <p>Функция отслеживания в реальном времени будет доступна после назначения курьера.</p>
                 <?php endif; ?>
             </div>
-            <div class="info-card">
-                <div class="info-icon">📍</div>
-                <h2>Ваш город</h2>
-                <p>Якутск, Республика Саха (Якутия)</p>
-            </div>
             <div class="btn-row">
                 <button class="btn" onclick="history.back()">Назад</button>
             </div>

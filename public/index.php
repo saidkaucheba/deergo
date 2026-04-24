@@ -139,7 +139,7 @@ $deliveryTypes = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
         <div class="about-cards">
             <div class="about-card">
-                <img src="images/fast.jpg" alt="">
+                <img src="images/time.png" alt="">
                 <h3>Быстро</h3>
                 <p>Доставка в течение нескольких часов</p>
             </div>

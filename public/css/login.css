@@ -136,6 +136,7 @@ body {
 }
 
 .btn-submit {
+    font-family: 'Schiffbauer', Arial, sans-serif;
     background: #0B1C2F;
     color: white;
     border: none;

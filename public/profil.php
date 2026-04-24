@@ -141,20 +141,6 @@ if (!empty($user['Image'])) {
                            placeholder="Номер телефона"
                            value="<?= htmlspecialchars($user['Phone'] ?? '') ?>">
                 </div>
-
-                <!-- Показываем роль -->
-                <div class="field-box" style="background:#f0f0f0; padding: 0 18px;">
-                    <span style="font-size:17px; color:#555;">
-                        Роль: <strong>
-                        <?php
-                        if ($user['Role'] == 1) echo 'Курьер';
-                        elseif ($user['Role'] == 0) echo 'Пользователь';
-                        else echo 'Пользователь';
-                        ?>
-                        </strong>
-                    </span>
-                </div>
-
                 <div class="btn-row">
                     <button type="button" class="btn" onclick="history.back()">Назад</button>
                     <button type="submit" class="btn btn-save">Сохранить</button>
