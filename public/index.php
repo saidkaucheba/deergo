@@ -23,7 +23,7 @@ $deliveryTypes = mysqli_fetch_all($result, MYSQLI_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeerGo — Главная</title>
+    <title>Главная</title>
     <link rel="stylesheet" href="css/fonts.css"> 
     <link rel="stylesheet" href="css/glav.css">
 </head>
@@ -49,10 +49,10 @@ $deliveryTypes = mysqli_fetch_all($result, MYSQLI_ASSOC);
 <main class="main">
 
     <h1 class="page-title">Быстрая доставка по всему городу</h1>
-    <p class="page-sub">Выберите адреса и параметры — мы доставим быстро и бережно.</p>
+    <p class="page-sub">Выберите адреса и параметры - мы доставим быстро и бережно.</p>
 
     <?php if (isset($_GET['error']) && $_GET['error'] === 'empty_address'): ?>
-        <p class="error-msg">⚠️ Пожалуйста, введите адреса «Откуда» и «Куда».</p>
+        <p class="error-msg">Пожалуйста, введите адреса «Откуда» и «Куда».</p>
     <?php endif; ?>
 
     <div class="top-row">
@@ -79,7 +79,6 @@ $deliveryTypes = mysqli_fetch_all($result, MYSQLI_ASSOC);
                 <input type="hidden" name="weight" id="weightVal" value="10">
                 <input type="hidden" name="type_id" id="typeIdVal" value="<?= $deliveryTypes[0]['Id'] ?? 1 ?>">
 
-                <!-- ВЕС -->
                 <div class="section">
                     <div class="page-title ">Размер доставки</div>
                     <div class="cards-row" id="size-group">
@@ -92,7 +91,6 @@ $deliveryTypes = mysqli_fetch_all($result, MYSQLI_ASSOC);
                     </div>
                 </div>
 
-                <!-- ТИП -->
                 <div class="section">
                     <div class="page-title ">Вид доставки</div>
                     <div class="cards-row" id="type-group">
@@ -117,8 +115,6 @@ $deliveryTypes = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
             </form>
         </div>
-
-        <!-- ПРАВАЯ ЧАСТЬ -->
         <div class="right-panel">
             <div class="delivery-photo">
                 <img src="images/dostav.jpg" alt="">
@@ -132,8 +128,6 @@ $deliveryTypes = mysqli_fetch_all($result, MYSQLI_ASSOC);
             </div>
         </div>
     </div>
-
-    <!-- О НАС -->
     <div class="about-section">
         <h2 class="about-title">Почему выбирают DeerGo?</h2>
 
@@ -145,21 +139,19 @@ $deliveryTypes = mysqli_fetch_all($result, MYSQLI_ASSOC);
             </div>
 
             <div class="about-card">
-                <img src="images/safe.jpg" alt="">
+                <img src="images/strahovka.png" alt="">
                 <h3>Надёжно</h3>
                 <p>Гарантия безопасности груза</p>
             </div>
 
             <div class="about-card">
-                <img src="images/money.jpg" alt="">
+                <img src="images/money.png" alt="">
                 <h3>Выгодно</h3>
                 <p>Честные цены без переплат</p>
             </div>
         </div>
     </div>
-
 </main>
-
 <script>
 document.querySelectorAll('#size-group .card').forEach(card => {
     card.onclick = () => {

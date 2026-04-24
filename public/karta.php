@@ -30,7 +30,7 @@ if ($orderId > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeerGo — Карта</title>
+    <title>Карта</title>
     <link rel="stylesheet" href="css/fonts.css"> 
     <link rel="stylesheet" href="css/karta.css">
 </head>
@@ -71,7 +71,6 @@ if ($orderId > 0) {
 
         <div class="map-info">
             <div class="info-card">
-                <div class="info-icon">📦</div>
                 <h2>Отслеживание</h2>
                 <?php if ($orderInfo): ?>
                     <p><strong>Статус:</strong> <?= htmlspecialchars($orderInfo['status_name']) ?></p>
@@ -93,12 +92,12 @@ if ($orderId > 0) {
 <script>
 ymaps.ready(function () {
     var map = new ymaps.Map('map', {
-        center: [62.0355, 129.6755],
-        zoom: 12,
+        center: [62.064219, 129.670697],
+        zoom: 14,
         controls: ['zoomControl', 'fullscreenControl']
     });
 
-    var placemark = new ymaps.Placemark([62.0355, 129.6755], {
+    var placemark = new ymaps.Placemark([62.064219, 129.670697], {
         balloonContent: 'DeerGo — служба доставки'
     }, {
         preset: 'islands#darkBlueDeliveryIcon'

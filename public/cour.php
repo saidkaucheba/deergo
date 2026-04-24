@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeerGo — Для курьеров</title>
+    <title>Для курьеров</title>
     <link rel="stylesheet" href="css/fonts.css"> 
     <link rel="stylesheet" href="css/cour.css">
 </head>
 <body>
 
-<!-- ХЕДЕР (как на главной) -->
 <header class="header">
     <div class="header-left">
         <div class="logo-img">
@@ -29,8 +28,6 @@
 <main class="main">
     <h1 class="page-title">Стань курьером DeerGo</h1>
     <p class="page-sub">Работай в удобное время и зарабатывай больше.</p>
-
-    <!-- ВЫБОР ТРАНСПОРТА -->
     <div class="section">
         <div class="section-title">Выберите, кем работать</div>
         <div class="transport-row" id="transport-group">
@@ -57,49 +54,47 @@
         </div>
     </div>
 
-    <!-- ПРЕИМУЩЕСТВА -->
     <div class="section">
         <div class="section-title">Почему работать курьером удобно</div>
         <div class="benefits-grid">
             <div class="benefit-card">
-                <!-- Замените на ваши файлы: images/icon_money.png и т.д. -->
                 <div class="benefit-icon">
-                    <img src="images/icon_money.png" alt="Доход" onerror="this.style.display='none';this.parentNode.innerHTML='💰'">
+                    <img src="images/money.png" alt="Доход">
                 </div>
                 <h3>Высокий доход</h3>
                 <p>Зарабатывай от 5000 ₽ в день. Выплаты каждую неделю</p>
             </div>
             <div class="benefit-card">
                 <div class="benefit-icon">
-                    <img src="images/icon_schedule.png" alt="График" onerror="this.style.display='none';this.parentNode.innerHTML='🕐'">
+                    <img src="images/grafik.png" alt="График">
                 </div>
                 <h3>Гибкий график</h3>
                 <p>Работай когда удобно. Никаких штрафов за отказы</p>
             </div>
             <div class="benefit-card">
                 <div class="benefit-icon">
-                    <img src="images/icon_home.png" alt="Рядом" onerror="this.style.display='none';this.parentNode.innerHTML='🏠'">
+                    <img src="images/home.png" alt="Рядом">
                 </div>
                 <h3>Рядом с домом</h3>
                 <p>Выбирай заказы в своём районе. Не нужно ехать далеко</p>
             </div>
             <div class="benefit-card">
                 <div class="benefit-icon">
-                    <img src="images/icon_app.png" alt="Приложение" onerror="this.style.display='none';this.parentNode.innerHTML='📱'">
+                    <img src="images/phone.png" alt="Приложение">
                 </div>
                 <h3>Удобное приложение</h3>
                 <p>Всё в телефоне: заказы, маршруты, выплаты</p>
             </div>
             <div class="benefit-card">
                 <div class="benefit-icon">
-                    <img src="images/icon_insurance.png" alt="Страховка" onerror="this.style.display='none';this.parentNode.innerHTML='🛡️'">
+                    <img src="images/strahovka.png" alt="Страховка">
                 </div>
                 <h3>Страховка</h3>
                 <p>Бесплатная страховка на время выполнения заказа</p>
             </div>
             <div class="benefit-card">
                 <div class="benefit-icon">
-                    <img src="images/icon_bonus.png" alt="Бонусы" onerror="this.style.display='none';this.parentNode.innerHTML='🎁'">
+                    <img src="images/podarok.png" alt="Бонусы">
                 </div>
                 <h3>Бонусы и акции</h3>
                 <p>Дополнительные выплаты за активность и часы пик</p>
@@ -107,7 +102,6 @@
         </div>
     </div>
 
-    <!-- РАСПИСАНИЕ -->
     <div class="section">
         <div class="section-title">Выберите расписание</div>
         <div class="schedule-row" id="schedule-group">
@@ -117,7 +111,6 @@
         </div>
     </div>
 
-    <!-- ФОРМА -->
     <div class="form-section">
         <div class="form-group">
             <div class="form-input">
@@ -139,7 +132,6 @@
 </main>
 
 <script>
-// ===== ПОЛЗУНОК ТРАНСПОРТ =====
 document.querySelectorAll('#transport-group .transport-card').forEach(function(card) {
     card.addEventListener('click', function() {
         document.querySelectorAll('#transport-group .transport-card').forEach(function(c) {
@@ -149,7 +141,6 @@ document.querySelectorAll('#transport-group .transport-card').forEach(function(c
     });
 });
 
-// ===== ПОЛЗУНОК РАСПИСАНИЕ =====
 document.querySelectorAll('#schedule-group .schedule-card').forEach(function(card) {
     card.addEventListener('click', function() {
         document.querySelectorAll('#schedule-group .schedule-card').forEach(function(c) {
@@ -159,7 +150,6 @@ document.querySelectorAll('#schedule-group .schedule-card').forEach(function(car
     });
 });
 
-// ===== ОТПРАВКА ЗАЯВКИ =====
 function submitApplication() {
     var firstname = sanitize(document.getElementById('firstname').value.trim());
     var lastname  = sanitize(document.getElementById('lastname').value.trim());

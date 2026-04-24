@@ -18,14 +18,12 @@ if (!$from || !$to) {
     exit;
 }
 
-// Данные о типе доставки из БД
 $typeId_safe  = (int)$typeId;
 $res          = mysqli_query($conn, "SELECT * FROM DeliveryTypes WHERE Id = $typeId_safe");
 $deliveryType = mysqli_fetch_assoc($res);
 $typeName     = $deliveryType['Name']  ?? 'Курьер';
 $basePrice    = (int)($deliveryType['Price'] ?? 300);
 
-// Расчёт стоимости
 $distanceKm = 5;
 $price = $basePrice + ($weight * 5) + ($distanceKm * 10);
 
@@ -36,32 +34,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay'])) {
     csrf_verify();
     $comment = mysqli_real_escape_string($conn, trim($_POST['comment'] ?? ''));
 
-    // Адрес «Откуда»
     $fromParts  = explode(',', $from);
     $fromStreet = mysqli_real_escape_string($conn, trim($fromParts[0] ?? $from));
     $fromHouse  = mysqli_real_escape_string($conn, trim($fromParts[1] ?? '1'));
     mysqli_query($conn, "INSERT INTO Addresses (UsersAndCouriersId, Street, House) VALUES ($userId, '$fromStreet', '$fromHouse')");
     $fromAddrId = mysqli_insert_id($conn);
 
-    // Адрес «Куда»
     $toParts  = explode(',', $to);
     $toStreet = mysqli_real_escape_string($conn, trim($toParts[0] ?? $to));
     $toHouse  = mysqli_real_escape_string($conn, trim($toParts[1] ?? '1'));
     mysqli_query($conn, "INSERT INTO Addresses (UsersAndCouriersId, Street, House) VALUES ($userId, '$toStreet', '$toHouse')");
     $toAddrId = mysqli_insert_id($conn);
 
-    // Первый статус из БД
     $stRes    = mysqli_query($conn, "SELECT Id FROM OrderStatuses ORDER BY Id LIMIT 1");
     $stRow    = mysqli_fetch_assoc($stRes);
     $statusId = $stRow['Id'] ?? 1;
 
-    // Номер заказа
     $maxRes = mysqli_query($conn, "SELECT MAX(Id) + 1 AS next_num FROM Orders");
     $maxRow = mysqli_fetch_assoc($maxRes);
     $orderNum = (string)($maxRow['next_num'] ?? 1);
     $orderNum_safe = mysqli_real_escape_string($conn, $orderNum);
 
-    // Запись заказа
     mysqli_query($conn, "
         INSERT INTO Orders
             (OrderNumber, UsersAndCouriersId, ShipmentAddressId, DeliveryAddressId,
@@ -71,7 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay'])) {
              $typeId_safe, $statusId, $weight, $price, '$comment', NOW())
     ");
 
-    // Очищаем сессию
     unset($_SESSION['delivery_from'], $_SESSION['delivery_to'],
           $_SESSION['delivery_weight'], $_SESSION['delivery_type']);
 
@@ -83,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeerGo — Оформление доставки</title>
+    <title>Оформление доставки</title>
     <link rel="stylesheet" href="css/fonts.css"> 
     <link rel="stylesheet" href="css/oform.css">
 </head>
@@ -116,24 +108,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay'])) {
             <form method="POST">
                 <div class="field-card">
                     <label class="field-label">Комментарий к доставке</label>
-                    <textarea class="field-textarea" name="comment"
-                              placeholder="Например: позвонить за 10 минут, оставить у двери..."></textarea>
+                    <textarea class="field-textarea" name="comment"></textarea>
                 </div>
-
                 <div class="field-card">
                     <label class="field-label">Способ оплаты</label>
                     <div class="pay-options">
                         <label class="pay-option">
                             <input type="radio" name="payment" value="card" checked>
-                            <span>💳 Банковская карта</span>
+                            <span>Банковская карта</span>
                         </label>
                         <label class="pay-option">
                             <input type="radio" name="payment" value="cash">
-                            <span>💵 Наличные курьеру</span>
+                            <span>Наличные курьеру</span>
                         </label>
                         <label class="pay-option">
                             <input type="radio" name="payment" value="sbp">
-                            <span>📲 СБП</span>
+                            <span>Перевод по номеру телефона</span>
                         </label>
                     </div>
                 </div>
@@ -183,7 +173,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay'])) {
 <?php if ($orderPlaced): ?>
 <div class="overlay">
     <div class="popup">
-        <div class="popup-icon">✅</div>
         <h2>Доставка оформлена!</h2>
         <p>Номер вашего заказа:<br><strong><?= htmlspecialchars($orderNum) ?></strong></p>
         <p>Заказ скоро будет передан в работу.</p>
@@ -191,6 +180,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay'])) {
     </div>
 </div>
 <?php endif; ?>
-
 </body>
 </html>

@@ -5,7 +5,6 @@ body {
     font-family: 'Schiffbauer', Arial, sans-serif;
 }
 
-/* ===== ХЕДЕР ===== */
 .header {
     background-color: #0B1C2F;
     height: 90px;
@@ -56,7 +55,6 @@ body {
 
 .profile-btn:hover { background-color: #b8c060; }
 
-/* ===== КОНТЕНТ ===== */
 .main {
     max-width: 1100px;
     margin: 0 auto;
@@ -82,9 +80,14 @@ body {
     align-items: flex-start;
 }
 
-/* ===== ЛЕВАЯ ЧАСТЬ ===== */
 .left-col {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.left-col form {
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -118,7 +121,6 @@ body {
     font-family: Arial, sans-serif;
 }
 
-/* Способы оплаты */
 .pay-options {
     display: flex;
     flex-direction: column;
@@ -139,7 +141,6 @@ body {
 
 .pay-option input[type="radio"] { width: 18px; height: 18px; cursor: pointer; }
 
-/* КНОПКИ */
 .btn-row { display: flex; gap: 16px; margin-top: 8px; }
 
 .btn {
@@ -164,7 +165,6 @@ body {
 
 .btn-pay:hover { background: #1a2f45; }
 
-/* ===== ПРАВАЯ ЧАСТЬ (СВОДКА) ===== */
 .right-col { flex: 1; }
 
 .summary-card {
@@ -205,7 +205,6 @@ body {
     color: #888;
 }
 
-/* ===== ПОПАП ===== */
 .overlay {
     position: fixed;
     inset: 0;
