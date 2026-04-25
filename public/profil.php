@@ -5,12 +5,11 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-require_once 'db.php';   // убедись, что db.php подключает MySQL
+require_once 'db.php';
 $userId = $_SESSION['user_id'];
 $saved  = false;
 $error  = '';
 
-// Загружаем данные из БД
 $stmt = mysqli_prepare($conn, "SELECT * FROM UsersAndCouriers WHERE Id = ?");
 mysqli_stmt_bind_param($stmt, "i", $userId);
 mysqli_stmt_execute($stmt);
@@ -18,7 +17,6 @@ mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $user = mysqli_fetch_assoc($result);
 
-// Сохранение
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $firstname = trim($_POST['firstname'] ?? '');
     $lastname  = trim($_POST['lastname']  ?? '');
@@ -27,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$firstname || !$email) {
         $error = 'Имя и email обязательны.';
     } else {
-        // Если загружено фото — сохраняем вместе с остальными данными
         if (!empty($_FILES['photo']['tmp_name']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
             $photoData = file_get_contents($_FILES['photo']['tmp_name']);
             $stmt = mysqli_prepare($conn, 
@@ -60,7 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['user_last']  = $lastname;
         $_SESSION['user_email'] = $email;
 
-        // Перечитываем пользователя из БД
         $stmt = mysqli_prepare($conn, "SELECT * FROM UsersAndCouriers WHERE Id = ?");
         mysqli_stmt_bind_param($stmt, "i", $userId);
         mysqli_stmt_execute($stmt);
@@ -71,7 +67,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Формируем src для фото из BLOB
 $photoSrc = '';
 if (!empty($user['Image'])) {
     $photoSrc = 'data:image/jpeg;base64,' . base64_encode($user['Image']);
@@ -82,7 +77,7 @@ if (!empty($user['Image'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeerGo — Профиль</title>
+    <title>Профиль</title>
     <link rel="stylesheet" href="css/fonts.css"> 
     <link rel="stylesheet" href="css/profil.css">
 </head>

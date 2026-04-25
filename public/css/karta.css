@@ -74,14 +74,12 @@ body {
     margin-bottom: 32px;
 }
 
-/* МАКЕТ */
 .map-layout {
     display: flex;
     gap: 30px;
     align-items: flex-start;
 }
 
-/* КАРТА */
 .map-box {
     flex: 2;
     height: 550px;
@@ -90,7 +88,6 @@ body {
     background: #ddd;
 }
 
-/* ПРАВАЯ ПАНЕЛЬ */
 .map-info {
     flex: 1;
     display: flex;

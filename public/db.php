@@ -1,5 +1,5 @@
 <?php
-$host = '127.0.1.31';
+$host = '127.0.0.1';
 $user = 'root';
 $pass = '';
 $base = 'deergo';

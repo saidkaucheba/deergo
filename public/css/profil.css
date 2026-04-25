@@ -5,7 +5,6 @@ body {
     font-family: 'Schiffbauer', Arial, sans-serif;
 }
 
-/* ===== ХЕДЕР (как на главной) ===== */
 .header {
     background-color: #0B1C2F;
     height: 90px;
@@ -59,7 +58,6 @@ body {
 
 .active-btn { outline: 3px solid white; }
 
-/* ===== КОНТЕНТ ===== */
 .main {
     max-width: 1100px;
     margin: 0 auto;
@@ -130,7 +128,6 @@ body {
     flex: 1;
 }
 
-/* ФОТО */
 .photo-box {
     background: white;
     border-radius: 14px;
@@ -157,7 +154,6 @@ body {
     object-fit: cover;
 }
 
-/* КНОПКИ */
 .btn-row { display: flex; gap: 16px; }
 
 .btn {

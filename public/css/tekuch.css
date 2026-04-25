@@ -5,7 +5,6 @@ body {
     font-family: 'Schiffbauer', Arial, sans-serif;
 }
 
-/* ===== ХЕДЕР ===== */
 .header {
     background-color: #0B1C2F;
     height: 90px;
@@ -56,7 +55,6 @@ body {
 
 .profile-btn:hover { background-color: #b8c060; }
 
-/* ===== КОНТЕНТ ===== */
 .main {
     max-width: 1200px;
     margin: 0 auto;
@@ -76,14 +74,12 @@ body {
     margin-bottom: 32px;
 }
 
-/* ===== МАКЕТ ===== */
 .delivery-layout {
     display: flex;
     gap: 30px;
     align-items: flex-start;
 }
 
-/* СПИСОК */
 .orders-list {
     display: flex;
     flex-direction: column;
@@ -130,7 +126,6 @@ body {
     color: #555;
 }
 
-/* КНОПКА К КАРТЕ */
 .btn-map {
     display: inline-block;
     background: #0B1C2F;
@@ -146,7 +141,6 @@ body {
 
 .btn-map:hover { background: #1a2f45; }
 
-/* ПРАВАЯ ПАНЕЛЬ */
 .right-col {
     display: flex;
     flex-direction: column;
@@ -191,7 +185,6 @@ body {
 
 .btn-map-big:hover { background: #1a2f45; }
 
-/* КНОПКИ */
 .btn-row { display: flex; gap: 16px; }
 
 .btn {
